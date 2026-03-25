@@ -190,8 +190,7 @@ export default function ComposerPage() {
             <label className="block">
               <input 
                 type="file" 
-                accept="image/*" 
-                capture="environment"
+                accept="image/*"
                 onChange={handlePhotoUpload}
                 disabled={uploading}
                 className="hidden"
