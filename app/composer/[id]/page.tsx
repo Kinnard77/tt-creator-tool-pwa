@@ -187,29 +187,6 @@ export default function ComposerPage() {
               </button>
             </div>
           ) : (
-            <label className="block">
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                disabled={uploading}
-                className="hidden"
-              />
-              <div className={`h-24 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 text-sm cursor-pointer ${uploading ? 'opacity-50' : ''}`}>
-                {uploading ? 'Subiendo...' : '📷 Tocar para agregar foto'}
-              </div>
-            </label>
-          )}
-          
-          {photoUrl && (
-            <input
-              type="text"
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
-              placeholder="O pega una URL..."
-              className="w-full mt-2 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"
-            />
-          )}
         </div>
 
         {/* ⚡ Trigger */}
