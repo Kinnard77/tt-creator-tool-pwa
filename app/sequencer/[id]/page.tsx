@@ -132,6 +132,83 @@ export default function SequencerPage() {
           </div>
         )}
       </div>
+
+      {/* 🔥 FLUJO DEL VIAJE DEL HÉROE */}
+      <div className="bg-slate-900 border-t border-slate-800 p-3 shrink-0">
+        <details className="group">
+          <summary className="cursor-pointer text-xs text-violet-400 uppercase tracking-wider flex items-center justify-between">
+            <span>🎯 Viaje del Héroe</span>
+            <span className="group-open:rotate-90 transition-transform">▶</span>
+          </summary>
+          
+          <div className="mt-3 space-y-2 text-xs">
+            {/* Pruebas - Nodos físicos */}
+            <div className="bg-slate-800 p-2 rounded border-l-2 border-violet-500">
+              <p className="font-bold text-violet-400">🧪 PRUEBAS (Nodos físicos)</p>
+              <p className="text-slate-400">{allUmbrales.length} nodos creados</p>
+              <p className="text-slate-500 mt-1">
+                El jugador resuelve puzzles en ubicaciones reales de la catedral.
+                Al completar todos → activa la Cámara Oscura.
+              </p>
+            </div>
+
+            {/* Cámara Oscura - Dinámica */}
+            <div className="bg-slate-800 p-2 rounded border-l-2 border-red-500">
+              <p className="font-bold text-red-400">🌑 CÁMARA OSCURA (Dinámica)</p>
+              <p className="text-slate-400">Experiencia sin ubicación física</p>
+              <p className="text-slate-500 mt-1">
+                Se activa automáticamente después de completar las pruebas.
+                Prueba difícil de carácter interior. "Muerte del yo".
+              </p>
+            </div>
+
+            {/* Recompensa */}
+            <div className="bg-slate-800 p-2 rounded border-l-2 border-amber-500">
+              <p className="font-bold text-amber-400">🏆 RECOMPENSA</p>
+              <p className="text-slate-400">Cena real en restaurante local</p>
+              <p className="text-slate-500 mt-1">
+                Otorgada después de superar la Cámara Oscura.
+                La verdadera recompensa en el mundo real.
+              </p>
+            </div>
+
+            {/* Renacimiento */}
+            <div className="bg-slate-800 p-2 rounded border-l-2 border-emerald-500">
+              <p className="font-bold text-emerald-400">✨ RENACIMIENTO</p>
+              <p className="text-slate-400">Transformación final</p>
+              <p className="text-slate-500 mt-1">
+                El jugador deja de ser "Nadie" → se convierte en Espía.
+                Nueva percepción de lo sagrado y sublime.
+              </p>
+            </div>
+          </div>
+
+          {/* Progreso visual */}
+          <div className="mt-3 pt-2 border-t border-slate-700">
+            <p className="text-[10px] text-slate-500 mb-2">PROGRESO DEL JUGADOR:</p>
+            <div className="flex gap-1">
+              <div className="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
+                <div className="h-full bg-violet-500" style={{ width: allUmbrales.length > 0 ? '30%' : '0%' }}></div>
+              </div>
+              <div className="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
+                <div className="h-full bg-red-500" style={{ width: allUmbrales.length >= 4 ? '100%' : '0%' }}></div>
+              </div>
+              <div className="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
+                <div className="h-full bg-amber-500" style={{ width: allUmbrales.length >= 4 ? '100%' : '0%' }}></div>
+              </div>
+              <div className="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
+                <div className="h-full bg-emerald-500" style={{ width: allUmbrales.length >= 4 ? '100%' : '0%' }}></div>
+              </div>
+            </div>
+            <div className="flex justify-between text-[8px] text-slate-600 mt-1">
+              <span>Pruebas</span>
+              <span>Cámara</span>
+              <span>Premio</span>
+              <span>Éxtasis</span>
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
