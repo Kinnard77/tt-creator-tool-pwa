@@ -139,7 +139,6 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
         {/* Umbral markers */}
         {umbrales.map((u, i) => {
           const nodeNumber = i + 1;
-          const L = require('leaflet');
           const icon = (window as any).createNumberIcon 
             ? (window as any).createNumberIcon(nodeNumber)
             : undefined;
