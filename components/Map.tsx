@@ -11,13 +11,13 @@ interface Umbral {
   experience_config?: { ciclo?: number };
 }
 
-// Colores por ciclo
+// Colores por ciclo (duotone gradient)
 const CICLO_COLORS: Record<number, string> = {
-  1: '#8b5cf6',  // Violeta
-  2: '#3b82f6',  // Azul
-  3: '#22c55e',  // Verde
-  4: '#f97316',  // Naranja
-  5: '#ef4444',  // Rojo
+  1: 'linear-gradient(135deg, #8b5cf6, #ec4899)',  // Violeta→Rosa
+  2: 'linear-gradient(135deg, #3b82f6, #06b6d4)',  // Azul→Cyan
+  3: 'linear-gradient(135deg, #22c55e, #14b8a6)',  // Verde→Teal
+  4: 'linear-gradient(135deg, #f97316, #eab308)',  // Naranja→Ambar
+  5: 'linear-gradient(135deg, #ef4444, #f43f5e)',  // Rojo→Rosa
 };
 
 function MapCenter({ lat, lng, centerKey }: { lat: number; lng: number; centerKey: number }) {
@@ -51,13 +51,13 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
     const L = require('leaflet');
     delete L.Icon.Default.prototype._getIconUrl;
     
-    // Custom numbered icons with ciclo color
+    // Custom numbered icons with ciclo color (duotone)
     const createNumberIcon = (num: number, ciclo: number = 1) => {
-      const colorHex = CICLO_COLORS[ciclo] || CICLO_COLORS[1];
+      const gradient = CICLO_COLORS[ciclo] || CICLO_COLORS[1];
       
       return L.divIcon({
         html: `<div style="
-          background: ${colorHex};
+          background: ${gradient};
           color: white;
           width: 28px;
           height: 28px;
