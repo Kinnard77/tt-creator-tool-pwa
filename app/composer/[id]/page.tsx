@@ -37,39 +37,7 @@ export default function ComposerPage() {
   const [escenarioMediaType, setEscenarioMediaType] = useState<'text' | 'audio'>('text');
   const [escenarioMediaUrl, setEscenarioMediaUrl] = useState('');
 
-  // Foto de referencia
-  const [photoUrl, setPhotoUrl] = useState('');
-  const [uploading, setUploading] = useState(false);
-
   const [loading, setLoading] = useState(true);
-
-  // Función para subir foto
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    const fileName = `${umbralId}-${Date.now()}.${file.name.split('.').pop()}`;
-    
-    const { data, error } = await supabase.storage
-      .from('umbrales-fotos')
-      .upload(fileName, file);
-
-    if (error) {
-      alert('Error al subir: ' + error.message);
-      setUploading(false);
-      return;
-    }
-
-    const { data: urlData } = supabase.storage
-      .from('umbrales-fotos')
-      .getPublicUrl(fileName);
-
-    if (urlData?.publicUrl) {
-      setPhotoUrl(urlData.publicUrl);
-    }
-    setUploading(false);
-  };
 
   // Load existing umbral data
   useEffect(() => {
@@ -84,10 +52,6 @@ export default function ComposerPage() {
         setTriggerRadius(data.trigger_config?.radius || 5);
         if (data.experience_config) {
           const exp = data.experience_config;
-          // Load photo
-          if (exp.photoUrl) {
-            setPhotoUrl(exp.photoUrl);
-          }
           // Load umbra layer
           if (exp.umbra) {
             setUmbraType(exp.umbra.type || 'text');
@@ -119,7 +83,6 @@ export default function ComposerPage() {
 
   const handleSave = async () => {
     const experience_config = {
-      photoUrl,
       umbra: {
         type: umbraType,
         content: umbraContent,
@@ -166,27 +129,18 @@ export default function ComposerPage() {
     <div className="min-h-screen bg-black text-white pb-8">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between sticky top-0 z-20">
-        <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        <Link href="javascript:history.back()" className="text-violet-400 hover:underline text-sm">← Volver</Link>
         <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
         <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
       </header>
 
       <div className="p-4 space-y-4">
-        {/* 📷 Foto de referencia */}
+        {/* 📷 Foto */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <p className="text-xs text-slate-500 mb-2">📷 Foto de referencia</p>
-          
-          {photoUrl ? (
-            <div className="relative">
-              <img src={photoUrl} alt="Referencia" className="w-full h-40 object-cover rounded-lg" />
-              <button 
-                onClick={() => setPhotoUrl('')}
-                className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 text-xs"
-              >
-                ✕
-              </button>
-            </div>
-          ) : (
+          <div className="h-24 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 text-sm">
+            Tocar para agregar
+          </div>
         </div>
 
         {/* ⚡ Trigger */}
