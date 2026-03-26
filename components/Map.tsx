@@ -40,6 +40,33 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
     setIsMounted(true);
     const L = require('leaflet');
     delete L.Icon.Default.prototype._getIconUrl;
+    
+    // Custom numbered icons
+    const createNumberIcon = (num: number) => {
+      return L.divIcon({
+        html: `<div style="
+          background: linear-gradient(135deg, #8b5cf6, #ec4899);
+          color: white;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 12px;
+          border: 2px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        ">${num}</div>`,
+        className: 'numbered-marker',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        popupAnchor: [0, -14]
+      });
+    };
+    
+    (window as any).createNumberIcon = createNumberIcon;
+    
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
       iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -110,19 +137,27 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
         )}
 
         {/* Umbral markers */}
-        {umbrales.map((u, i) => (
-          <Marker 
-            key={u.id} 
-            position={[u.position.lat, u.position.lng]}
-          >
-            <Popup>
-              <div style={{ textAlign: 'center', padding: '5px' }}>
-                <strong>{u.type === 'umbra' ? '🌑 Umbra' : '🔯 Sigilum'}</strong><br/>
-                <span style={{ fontSize: '10px' }}>Pacing: {u.pacing_value}/10</span>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {umbrales.map((u, i) => {
+          const nodeNumber = i + 1;
+          const L = require('leaflet');
+          const icon = (window as any).createNumberIcon 
+            ? (window as any).createNumberIcon(nodeNumber)
+            : undefined;
+          return (
+            <Marker 
+              key={u.id} 
+              position={[u.position.lat, u.position.lng]}
+              icon={icon}
+            >
+              <Popup>
+                <div style={{ textAlign: 'center', padding: '5px' }}>
+                  <strong>🌑 Nodo {nodeNumber}</strong><br/>
+                  <span style={{ fontSize: '10px' }}>Pacing: {u.pacing_value}/10</span>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </>
   );
