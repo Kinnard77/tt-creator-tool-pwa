@@ -37,6 +37,9 @@ export default function ComposerPage() {
   const [escenarioMediaType, setEscenarioMediaType] = useState<'text' | 'audio'>('text');
   const [escenarioMediaUrl, setEscenarioMediaUrl] = useState('');
 
+  // Position for editing
+  const [position, setPosition] = useState({ lat: 0, lng: 0 });
+
   const [loading, setLoading] = useState(true);
 
   // Load existing umbral data
@@ -50,6 +53,7 @@ export default function ComposerPage() {
       
       if (data) {
         setTriggerRadius(data.trigger_config?.radius || 5);
+        setPosition(data.position || { lat: 0, lng: 0 });
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -105,6 +109,7 @@ export default function ComposerPage() {
     const { error } = await supabase
       .from('umbrales')
       .update({
+        position,
         trigger_config: { type: 'geo_radius', radius: triggerRadius, orientation: requiresOrientation },
         experience_config
       })
@@ -115,6 +120,28 @@ export default function ComposerPage() {
     } else {
       alert('✓ UMBRAL ACTUALIZADO');
     }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('¿Estás seguro de eliminar este nodo?')) return;
+    
+    const { error } = await supabase
+      .from('umbrales')
+      .delete()
+      .eq('id', umbralId);
+
+    if (error) {
+      alert('Error al eliminar: ' + error.message);
+    } else {
+      window.location.href = '/atlas';
+    }
+  };
+
+  const updatePosition = (deltaLat: number, deltaLng: number) => {
+    setPosition(prev => ({
+      lat: prev.lat + deltaLat,
+      lng: prev.lng + deltaLng
+    }));
   };
 
   if (loading) {
@@ -166,6 +193,38 @@ export default function ComposerPage() {
             />
             Requiere orientación específica
           </label>
+        </div>
+
+        {/* 📍 Ubicación del nodo */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-emerald-400 font-bold text-xs uppercase">📍 Ubicación</h2>
+            <button 
+              onClick={handleDelete}
+              className="text-xs bg-red-600 px-2 py-1 rounded"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+          
+          {/* Current coords */}
+          <div className="text-center mb-3">
+            <p className="text-xs text-slate-500">Coordenadas actuales</p>
+            <p className="font-mono text-sm">{position.lat.toFixed(6)}, {position.lng.toFixed(6)}</p>
+          </div>
+
+          {/* Fine position controls */}
+          <div className="grid grid-cols-3 gap-1 w-24 mx-auto">
+            <div></div>
+            <button onClick={() => updatePosition(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▲</button>
+            <div></div>
+            <button onClick={() => updatePosition(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">◄</button>
+            <button onClick={() => updatePosition(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">►</button>
+            <div></div>
+            <button onClick={() => updatePosition(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▼</button>
+            <div></div>
+          </div>
+          <p className="text-[10px] text-slate-500 text-center mt-2">+1m</p>
         </div>
 
         {/* 🎬 ESCENARIO (Capa histórica/dramática) */}
