@@ -243,7 +243,7 @@ export default function WalkerPage() {
         />
         
         {/* Precision controls - compact overlay */}
-        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-1.5 rounded-lg flex flex-col gap-0.5 w-16">
+        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded-lg flex flex-col gap-1 w-20">
           <button 
             onClick={() => {
               const lat = prompt('Latitud (ej: 43.7696):');
@@ -257,25 +257,26 @@ export default function WalkerPage() {
                 }
               }
             }}
-            className="bg-violet-600 px-1 py-0.5 rounded text-[8px] text-white font-bold"
+            className="bg-violet-600 px-2 py-1 rounded text-[9px] text-white font-bold"
           >
-            📍
+            📍 SET
           </button>
           
           {/* Current coords display */}
-          <div className="text-[7px] text-slate-400 text-center leading-tight">
-            {location.lat.toFixed(3)}<br/>{location.lng.toFixed(3)}
+          <div className="text-[8px] text-slate-400 text-center leading-tight">
+            {location.lat.toFixed(4)}<br/>{location.lng.toFixed(4)}
           </div>
           
           {/* Fine controls - 1m (compact D-pad) */}
           <div className="grid grid-cols-3 gap-0.5">
             <div></div>
-            <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">▲</button>
+            <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">▲</button>
             <div></div>
-            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">◄</button>
-            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">►</button>
+            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">◄</button>
             <div></div>
-            <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">▼</button>
+            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">►</button>
+            <div></div>
+            <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">▼</button>
             <div></div>
           </div>
         </div>
