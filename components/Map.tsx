@@ -8,7 +8,17 @@ interface Umbral {
   position: { lat: number; lng: number };
   type: 'umbra' | 'sigilum';
   pacing_value: number;
+  experience_config?: { ciclo?: number };
 }
+
+// Colores por ciclo
+const CICLO_COLORS: Record<number, string> = {
+  1: '#8b5cf6',  // Violeta
+  2: '#3b82f6',  // Azul
+  3: '#22c55e',  // Verde
+  4: '#f97316',  // Naranja
+  5: '#ef4444',  // Rojo
+};
 
 function MapCenter({ lat, lng, centerKey }: { lat: number; lng: number; centerKey: number }) {
   const map = useMap();
@@ -41,11 +51,13 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
     const L = require('leaflet');
     delete L.Icon.Default.prototype._getIconUrl;
     
-    // Custom numbered icons
-    const createNumberIcon = (num: number) => {
+    // Custom numbered icons with ciclo color
+    const createNumberIcon = (num: number, ciclo: number = 1) => {
+      const colorHex = CICLO_COLORS[ciclo] || CICLO_COLORS[1];
+      
       return L.divIcon({
         html: `<div style="
-          background: linear-gradient(135deg, #8b5cf6, #ec4899);
+          background: ${colorHex};
           color: white;
           width: 28px;
           height: 28px;
@@ -136,11 +148,12 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
           </Marker>
         )}
 
-        {/* Umbral markers */}
+        {/* Umbral markers with ciclo colors */}
         {umbrales.map((u, i) => {
           const nodeNumber = i + 1;
+          const ciclo = u.experience_config?.ciclo || 1;
           const icon = (window as any).createNumberIcon 
-            ? (window as any).createNumberIcon(nodeNumber)
+            ? (window as any).createNumberIcon(nodeNumber, ciclo)
             : undefined;
           return (
             <Marker 
@@ -151,6 +164,7 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
               <Popup>
                 <div style={{ textAlign: 'center', padding: '5px' }}>
                   <strong>🌑 Nodo {nodeNumber}</strong><br/>
+                  <span style={{ fontSize: '10px' }}>🌀 Ciclo {ciclo}</span><br/>
                   <span style={{ fontSize: '10px' }}>Pacing: {u.pacing_value}/10</span>
                 </div>
               </Popup>
