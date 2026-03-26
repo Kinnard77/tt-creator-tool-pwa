@@ -132,8 +132,10 @@ export default function ComposerPage() {
 
     if (error) {
       alert('Error al eliminar: ' + error.message);
+      console.error(error);
     } else {
-      window.location.href = '/atlas';
+      // Navigate back instead of to atlas
+      window.history.back();
     }
   };
 
@@ -193,6 +195,25 @@ export default function ComposerPage() {
             />
             Requiere orientación específica
           </label>
+        </div>
+
+        {/* 🌀 CICLO - Grupo de nodos */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h2 className="text-violet-400 font-bold text-xs uppercase mb-3">🌀 Ciclo</h2>
+          <p className="text-[10px] text-slate-500 mb-2">A qué ciclo pertenece este nodo (4 nodos = 1 metapuzzle)</p>
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map(c => (
+              <button
+                key={c}
+                onClick={() => {
+                  // We'll store this in experience_config.ciclo
+                }}
+                className="px-3 py-1 rounded text-xs bg-slate-700 hover:bg-slate-600"
+              >
+                🌀 {c}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 📍 Ubicación del nodo */}
