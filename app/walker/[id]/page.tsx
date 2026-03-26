@@ -242,8 +242,8 @@ export default function WalkerPage() {
           floorPlanUrl={floorPlanUrl}
         />
         
-        {/* Precision controls - SET COORDS BUTTON */}
-        <div className="absolute top-2 right-2 z-[1000] bg-slate-900/95 p-2 rounded-lg flex flex-col gap-1">
+        {/* Precision controls - compact overlay */}
+        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-1.5 rounded-lg flex flex-col gap-0.5 w-16">
           <button 
             onClick={() => {
               const lat = prompt('Latitud (ej: 43.7696):');
@@ -257,44 +257,26 @@ export default function WalkerPage() {
                 }
               }
             }}
-            className="bg-violet-600 px-2 py-1 rounded text-[10px] text-white font-bold"
+            className="bg-violet-600 px-1 py-0.5 rounded text-[8px] text-white font-bold"
           >
-            📍 SET COORDS
+            📍
           </button>
           
           {/* Current coords display */}
-          <div className="text-[9px] text-slate-400 text-center mt-1">
-            {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+          <div className="text-[7px] text-slate-400 text-center leading-tight">
+            {location.lat.toFixed(3)}<br/>{location.lng.toFixed(3)}
           </div>
           
-          {/* 10m jumps */}
-          <div className="border-t border-slate-600 pt-1 mt-1">
-            <p className="text-[9px] text-slate-500 text-center mb-1">+10m</p>
-            <div className="flex gap-1 justify-center">
-              <button onClick={() => adjustLocation(0.0001, 0)} className="bg-blue-700 px-2 py-1 rounded text-xs">N</button>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustLocation(0, -0.0001)} className="bg-blue-700 px-2 py-1 rounded text-xs">W</button>
-              <button onClick={() => adjustLocation(0, 0.0001)} className="bg-blue-700 px-2 py-1 rounded text-xs">E</button>
-            </div>
-            <div className="flex gap-1 justify-center">
-              <button onClick={() => adjustLocation(-0.0001, 0)} className="bg-blue-700 px-2 py-1 rounded text-xs">S</button>
-            </div>
-          </div>
-
-          {/* Fine controls - 1m */}
-          <div className="border-t border-slate-600 mt-1 pt-1">
-            <p className="text-[9px] text-slate-500 text-center mb-1">+1m</p>
-            <div className="flex gap-1 justify-center">
-              <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">⬆️</button>
-            </div>
-            <div className="flex gap-1">
-              <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">⬅️</button>
-              <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">➡️</button>
-            </div>
-            <div className="flex gap-1 justify-center">
-              <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">⬇️</button>
-            </div>
+          {/* Fine controls - 1m (compact D-pad) */}
+          <div className="grid grid-cols-3 gap-0.5">
+            <div></div>
+            <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">▲</button>
+            <div></div>
+            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">◄</button>
+            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">►</button>
+            <div></div>
+            <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[8px]">▼</button>
+            <div></div>
           </div>
         </div>
       </div>
