@@ -1,6 +1,6 @@
 # 📖 MANUAL DEL CREADOR - UMBRA Creator Tool
 
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Fecha:** Marzo 2026  
 **Proyecto:** Time Travelers - UMBRA
 
@@ -65,6 +65,30 @@ Grupo de 4 nodos que forman un **Metapuzzle** (resolver 4 = código final). Cada
 
 ### Cámara Oscura
 Experiencia dinámica (sin ubicación física) que aparece después de completar 4 nodos. Es la "prueba trascendental" del Viaje del Héroe.
+
+---
+
+## 🔍 CORE DYNAMICS: LA BÚSQUEDA (¡MUY IMPORTANTE!)
+
+La **búsqueda** es una de las mecánicas más importantes del juego - es tan fundamental como en un Escape Room y en la vida real.
+
+| Aspecto | Descripción |
+|---------|-------------|
+| **Buscar** | El jugador debe encontrar algo en el entorno real de la catedral |
+| **La narrativa** | Le dice QUÉ buscar y DÓNDE buscar |
+| **La precisión** | El jugador tiene que encontrar EXACTAMENTE lo que se le pide |
+
+#### Ejemplos de Búsqueda:
+- "Busca una letra tallada cerca del altar"
+- "Encuentra el arco número 7 del pórtico"
+- "Busca la piedra angular con el símbolo"
+- "Encuentra el banco más cercano al pilar"
+
+#### Tips para crear búsquedas efectivas:
+1. **Sé específico** en la narrativa (qué buscar, dónde)
+2. **El entorno debe tener elementos identificables** (letras, símbolos, números)
+3. **La respuesta debe ser verificable** (si el jugador dice "F", debe haber una "F" visible)
+4. **Combina búsqueda con otras mecánicas** (medir, contar, observar)
 
 ---
 
@@ -144,7 +168,7 @@ Experiencia dinámica (sin ubicación física) que aparece después de completar
 - **Ciclo:** 1 (violeta)
 - **ESCENARIO:**
   - Título: "La Capilla de los Muertos"
-  - Descripción: "Aquí descansar los nobles que financiaron la construcción..."
+  - Descripción: "Aquí descansan los nobles que financiaron la construcción..."
 - **SIGILUM:**
   - Puzzle: "Mide la distancia del banco al pilar más cercano. ¿Cuántos metros?"
   - Respuesta: 3
@@ -200,10 +224,11 @@ Los nodos se muestran con colores según su ciclo:
 
 ### Para el Levantamiento In-Situ:
 
-1. ** GPS no funciona bien en interiores** → Usá las flechitas de precisión (+1m) en el Walker
+1. **GPS no funciona bien en interiores** → Usá las flechitas de precisión (+1m) en el Walker
 2. **Primero caminá toda la catedral** → Identificá los lugares clave
 3. **Creá los nodos primero sin contenido** → Después completá en Composer
 4. **Cada nodo = un puzzle** → Pero pueden compartir narrativa
+5. **LA BÚSQUEDA ES CLAVE** → Los puzzles de búsqueda requieren elementos identificables en el entorno
 
 ### Para los Puzzles:
 - Que sean **resolubles** pero no obvios
