@@ -64,6 +64,23 @@ export default function PuzzlesPage() {
         <button onClick={() => setShowForm(!showForm)} className="bg-emerald-600 px-3 py-1 rounded text-sm">+ Nuevo</button>
       </header>
 
+      {/* 📋 WORKFLOW GUIDE */}
+      <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-3 mb-4">
+        <p className="text-xs text-amber-400 font-bold mb-2">📋 ORDEN RECOMENDADO:</p>
+        <div className="flex items-center gap-2 text-xs">
+          <Link href="/narrativas" className="text-violet-400 hover:underline">1️⃣ Narrativas</Link>
+          <span>→</span>
+          <span className="text-emerald-400">2️⃣ Puzzles</span>
+          <span>→</span>
+          <Link href="/atlas" className="text-violet-400 hover:underline">3️⃣ Nodos (UMBRA)</Link>
+        </div>
+        <p className="text-[10px] text-slate-500 mt-1">💡 Primero crea una narrativa, luego los puzzles vinculados, y finalmente los nodos en el mapa.</p>
+        
+        {narrativas.length === 0 && (
+          <p className="text-xs text-red-400 mt-2">⚠️ No hay narrativas. <Link href="/narrativas" className="underline">Crea una aquí primero</Link></p>
+        )}
+      </div>
+
       {showForm && (
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl mb-4 space-y-3">
           {/* Primero: Seleccionar narrativa */}

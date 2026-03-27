@@ -87,6 +87,19 @@ export default function NarrativasPage() {
         </button>
       </header>
 
+      {/* 📋 WORKFLOW GUIDE */}
+      <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-3 mb-4">
+        <p className="text-xs text-amber-400 font-bold mb-2">📋 ORDEN RECOMENDADO:</p>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-violet-400">1️⃣ Narrativas</span>
+          <span>→</span>
+          <Link href="/puzzles" className="text-emerald-400 hover:underline">2️⃣ Puzzles</Link>
+          <span>→</span>
+          <Link href="/atlas" className="text-violet-400 hover:underline">3️⃣ Nodos (UMBRA)</Link>
+        </div>
+        <p className="text-[10px] text-slate-500 mt-1">💡 Las narrativas son el punto de partida. Crea una historia primero.</p>
+      </div>
+
       {showForm && (
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl mb-4 space-y-3">
           {/* Dropdown de sugerencias */}
