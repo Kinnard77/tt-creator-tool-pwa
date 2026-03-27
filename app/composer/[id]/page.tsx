@@ -158,7 +158,7 @@ export default function ComposerPage() {
     <div className="min-h-screen bg-black text-white pb-8">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between sticky top-0 z-20">
-        <Link href="javascript:history.back()" className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
         <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
         <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
       </header>
