@@ -173,7 +173,7 @@ export default function WalkerPage() {
     <div className="h-screen flex flex-col bg-black text-white">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between shrink-0">
-        <Link href={`/atlas/${cathedralId}`} className="text-violet-400 hover:underline text-sm">← Atlas</Link>
+        <Link href="javascript:history.back()" className="text-violet-400 hover:underline text-sm">← Atlas</Link>
         <h1 className="text-violet-400 font-bold text-sm">🚶 The Walker</h1>
         <div className="flex gap-2">
           <button 

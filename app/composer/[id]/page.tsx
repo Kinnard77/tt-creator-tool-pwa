@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
 
 type LayerType = 'umbra' | 'sigilum' | 'escenario';
@@ -39,6 +40,7 @@ export default function ComposerPage() {
 
   // Position for editing
   const [position, setPosition] = useState({ lat: 0, lng: 0 });
+  const [cathedralId, setCathedralId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +56,7 @@ export default function ComposerPage() {
       if (data) {
         setTriggerRadius(data.trigger_config?.radius || 5);
         setPosition(data.position || { lat: 0, lng: 0 });
+        setCathedralId(data.cathedral_id);
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -158,7 +161,11 @@ export default function ComposerPage() {
     <div className="min-h-screen bg-black text-white pb-8">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between sticky top-0 z-20">
-        <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        {cathedralId ? (
+          <Link href={`/walker/${cathedralId}`} className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        ) : (
+          <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        )}
         <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
         <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
       </header>
@@ -171,6 +178,20 @@ export default function ComposerPage() {
             Tocar para agregar
           </div>
         </div>
+
+        {/* 📦 Data Collection Box */}
+        <Link href={`/composer/${umbralId}/data`} className="block">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 hover:bg-slate-800 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📦</span>
+                <p className="text-violet-400 font-bold text-sm">Data Collection Box</p>
+              </div>
+              <span className="text-slate-500">→</span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">Ingresa los 15 tipos de datos</p>
+          </div>
+        </Link>
 
         {/* ⚡ Trigger */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
