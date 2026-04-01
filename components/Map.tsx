@@ -9,6 +9,7 @@ interface Umbral {
   type: 'umbra' | 'sigilum';
   pacing_value: number;
   experience_config?: { ciclo?: number };
+  nodeNumber?: number;
 }
 
 // Colores por ciclo (duotone gradient)
@@ -150,7 +151,8 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
 
         {/* Umbral markers with ciclo colors */}
         {umbrales.map((u, i) => {
-          const nodeNumber = i + 1;
+          // Usar nodeNumber si está disponible, si no calcular desde índice
+          const nodeNumber = u.nodeNumber || (i + 1);
           // Buscar ciclo en experience_config o directamente en el objeto
           const ciclo = u.experience_config?.ciclo || (u as any).ciclo || 1;
           const icon = (window as any).createNumberIcon 

@@ -279,7 +279,7 @@ export default function WalkerPage() {
       <div className="flex-1 relative m-2 rounded-xl overflow-hidden border border-slate-800 min-h-[250px]">
         <MapComponent 
           center={location} 
-          umbrales={recentUmbrales}
+          umbrales={recentUmbrales.map((u, i) => ({ ...u, nodeNumber: i + 1 }))}
           floorPlanUrl={floorPlanUrl}
         />
         
@@ -384,6 +384,7 @@ export default function WalkerPage() {
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => {
               const ciclo = u.ciclo || 1;
+              const nodeNumber = i + 1; // Más reciente = 1
               const cicloColors = ['violet', 'blue', 'green', 'orange', 'red'];
               const colorClass = ciclo === 1 ? 'bg-violet-500' : ciclo === 2 ? 'bg-blue-500' : ciclo === 3 ? 'bg-green-500' : ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
               
@@ -394,7 +395,7 @@ export default function WalkerPage() {
                 >
                   <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
                   <span className="text-xs text-slate-400">🌀{ciclo}</span>
-                  <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
+                  <span className="flex-1 text-xs">Umbral {nodeNumber}</span>
                   <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
                   <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                   <Link
