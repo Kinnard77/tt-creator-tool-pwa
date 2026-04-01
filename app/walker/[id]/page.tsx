@@ -20,6 +20,7 @@ interface Umbral {
   position: { lat: number; lng: number };
   type: 'umbra' | 'sigilum';
   pacing_value: number;
+  ciclo?: number;
 }
 
 const DEFAULT_LAT = 21.1583;
@@ -39,6 +40,7 @@ export default function WalkerPage() {
   const [cathedral, setCathedral] = useState<any>(null);
   const [showFloorPlanInput, setShowFloorPlanInput] = useState(false);
   const [floorPlanUrl, setFloorPlanUrl] = useState('');
+  const [selectedCiclo, setSelectedCiclo] = useState(1);
 
   // Fetch cathedral and umbrales
   useEffect(() => {
@@ -77,7 +79,8 @@ export default function WalkerPage() {
           id: u.id,
           position: u.position,
           type: u.type,
-          pacing_value: u.pacing_value
+          pacing_value: u.pacing_value,
+          ciclo: u.experience_config?.ciclo || 1
         }));
         setRecentUmbrales(mappedUmbrales);
         
@@ -126,7 +129,7 @@ export default function WalkerPage() {
       cathedral_id: cathedralId,
       position: { lat: location.lat, lng: location.lng },
       trigger_config: { type: 'geo_radius', radius: 5 },
-      experience_config: { type: 'text', content: '' },
+      experience_config: { type: 'text', content: '', ciclo: selectedCiclo },
       pacing_value: 5,
       type: 'umbra',
       requires: []
@@ -149,7 +152,8 @@ export default function WalkerPage() {
         id: data.id,
         position: data.position,
         type: data.type,
-        pacing_value: data.pacing_value
+        pacing_value: data.pacing_value,
+        ciclo: selectedCiclo
       }, ...prev.slice(0, 9)]);
     }
 
@@ -328,7 +332,35 @@ export default function WalkerPage() {
         </p>
       </div>
 
-      {/* DROP Button */}
+      {/* Selector de Ciclo */}
+      <div className="px-3 py-2 bg-slate-800 border-y border-slate-700 shrink-0">
+        <p className="text-xs text-slate-500 mb-2">Selecciona el puzzle/ciclo</p>
+        <div className="flex gap-2">
+          {[
+            { id: 1, label: '1', color: 'violet' },
+            { id: 2, label: '2', color: 'blue' },
+            { id: 3, label: '3', color: 'green' },
+            { id: 4, label: '4', color: 'orange' },
+            { id: 5, label: '5', color: 'red' }
+          ].map(c => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedCiclo(c.id)}
+              className={`flex-1 py-2 rounded text-xs font-bold ${
+                selectedCiclo === c.id 
+                  ? c.color === 'violet' ? 'bg-violet-600' 
+                  : c.color === 'blue' ? 'bg-blue-600'
+                  : c.color === 'green' ? 'bg-green-600'
+                  : c.color === 'orange' ? 'bg-orange-600'
+                  : 'bg-red-600'
+                  : 'bg-slate-700'
+              }`}
+            >
+              🌀 {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="p-3 shrink-0">
         <button 
           onClick={handleDropUmbral}
@@ -337,7 +369,7 @@ export default function WalkerPage() {
             saving ? 'bg-slate-700 cursor-wait' : 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-violet-600/30 hover:from-violet-500 hover:to-purple-500'
           }`}
         >
-          {saving ? 'Guardando...' : '+ DROP UMBRAL'}
+          {saving ? 'Guardando...' : '+ DROP UMBRAL PUZZLE'}
         </button>
       </div>
 
@@ -350,23 +382,30 @@ export default function WalkerPage() {
           <p className="text-slate-600 text-sm">No hay umbrales. ¡Creá el primero!</p>
         ) : (
           <div className="space-y-1">
-            {recentUmbrales.map((u, i) => (
-              <div
-                key={u.id}
-                className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
-              >
-                <div className={`w-2 h-2 rounded-full ${u.type === 'umbra' ? 'bg-violet-500' : 'bg-amber-500'}`}></div>
-                <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
-                <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
-                <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
-                <Link
-                  href={`/composer/${u.id}`}
-                  className="text-xs bg-violet-600 px-2 py-1 rounded"
+            {recentUmbrales.map((u, i) => {
+              const ciclo = u.ciclo || 1;
+              const cicloColors = ['violet', 'blue', 'green', 'orange', 'red'];
+              const colorClass = ciclo === 1 ? 'bg-violet-500' : ciclo === 2 ? 'bg-blue-500' : ciclo === 3 ? 'bg-green-500' : ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
+              
+              return (
+                <div
+                  key={u.id}
+                  className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
                 >
-                  ✏️
-                </Link>
-              </div>
-            ))}
+                  <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
+                  <span className="text-xs text-slate-400">🌀{ciclo}</span>
+                  <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
+                  <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
+                  <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
+                  <Link
+                    href={`/composer/${u.id}`}
+                    className="text-xs bg-slate-700 px-2 py-1 rounded"
+                  >
+                    ✏️
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
