@@ -92,7 +92,7 @@ export default function AtlasPage() {
     <div className="min-h-screen bg-black text-white">
       <header className="bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between">
         <div>
-          <Link href="/" className="text-violet-400 hover:underline text-sm">← Atlas</Link>
+          <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Atlas</Link>
           <h1 className="text-xl font-bold mt-2">{cathedral.name}</h1>
           <p className="text-slate-500 text-sm">{cathedral.city}, {cathedral.country}</p>
           <p className="text-violet-400 text-xs mt-1">🟢 {cathedral.umbral_count || 0} umbrales</p>
