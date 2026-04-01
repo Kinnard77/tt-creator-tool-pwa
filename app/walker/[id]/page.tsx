@@ -389,11 +389,8 @@ export default function WalkerPage() {
       </div>
 
       {/* Recent Umbrales */}
-      <div className="px-4 pb-3 overflow-y-auto max-h-[20vh] shrink-0">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-slate-500 uppercase tracking-wider">Últimos nodos</p>
-          <span className="text-[10px] text-green-400">✓ {recentUmbrales.length} nodos</span>
-        </div>
+      <div className="px-4 pb-3 overflow-y-auto max-h-[20vh] shrink-0 bg-red-900 p-2 rounded-lg">
+        <p className="text-xs text-yellow-400 uppercase tracking-wider mb-2">🎯 ÚLTIMOS NODOS ({recentUmbrales.length})</p>
         {loading ? (
           <p className="text-slate-600">Cargando...</p>
         ) : recentUmbrales.length === 0 ? (
