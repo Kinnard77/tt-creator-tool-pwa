@@ -41,6 +41,7 @@ export default function WalkerPage() {
   const [showFloorPlanInput, setShowFloorPlanInput] = useState(false);
   const [floorPlanUrl, setFloorPlanUrl] = useState('');
   const [selectedCiclo, setSelectedCiclo] = useState(1);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   // Fetch cathedral and umbrales
   useEffect(() => {
@@ -398,13 +399,20 @@ export default function WalkerPage() {
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => {
               const ciclo = u.ciclo || 1;
-              const nodeNumber = u.nodeNumber || (i + 1); // Usar número permanente
+              const nodeNumber = u.nodeNumber || (i + 1);
               const colorClass = ciclo === 1 ? 'bg-violet-500' : ciclo === 2 ? 'bg-blue-500' : ciclo === 3 ? 'bg-green-500' : ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
+              const isSelected = selectedNodeId === u.id;
               
               return (
                 <div
                   key={u.id}
-                  className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
+                  onClick={() => {
+                    setSelectedNodeId(u.id);
+                    setLocation(u.position);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all ${
+                    isSelected ? 'bg-violet-900/50 border border-violet-500' : 'bg-slate-900 hover:bg-slate-800'
+                  }`}
                 >
                   <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
                   <span className="text-xs text-slate-400">🌀{ciclo}</span>
