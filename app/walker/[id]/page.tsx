@@ -408,6 +408,7 @@ export default function WalkerPage() {
                   key={u.id}
                   type="button"
                   onClick={() => {
+                    alert('Tocaste: Umbral ' + nodeNumber);
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
                   }}
