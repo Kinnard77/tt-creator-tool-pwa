@@ -5,6 +5,16 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabase';
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('@/components/Map'), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-48 bg-slate-800 flex items-center justify-center">
+      <p className="text-slate-500">Cargando mapa...</p>
+    </div>
+  )
+});
 
 type LayerType = 'umbra' | 'sigilum' | 'escenario';
 
@@ -167,7 +177,10 @@ export default function ComposerPage() {
           <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
         )}
         <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
-        <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
+        <div className="flex gap-2">
+          <button onClick={handleDelete} className="text-xs bg-red-600 px-2 py-1 rounded">🗑️ Eliminar</button>
+          <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
+        </div>
       </header>
 
       <div className="p-4 space-y-4">
@@ -239,14 +252,15 @@ export default function ComposerPage() {
 
         {/* 📍 Ubicación del nodo */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-emerald-400 font-bold text-xs uppercase">📍 Ubicación</h2>
-            <button 
-              onClick={handleDelete}
-              className="text-xs bg-red-600 px-2 py-1 rounded"
-            >
-              🗑️ Eliminar
-            </button>
+          <h2 className="text-emerald-400 font-bold text-xs uppercase mb-3">📍 Ubicación del nodo</h2>
+          
+          {/* Mapa */}
+          <div className="h-48 rounded-lg overflow-hidden mb-3">
+            <MapComponent 
+              center={position} 
+              umbrales={[]}
+              height="100%"
+            />
           </div>
           
           {/* Current coords */}

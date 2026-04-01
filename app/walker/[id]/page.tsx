@@ -57,6 +57,7 @@ export default function WalkerPage() {
           setIsLocationLocked(true); // Auto-fijar si tiene coordenadas reales
         } else if (cath.coords) {
           setLocation(cath.coords);
+          setIsLocationLocked(false); // Permite ajustar si está en 0,0
         }
         if (cath.floor_plan_url) {
           setFloorPlanUrl(cath.floor_plan_url);
@@ -102,6 +103,7 @@ export default function WalkerPage() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
+          // No bloquear cuando obtiene GPS - permite crear nodos
         },
         () => {
           alert('No se pudo obtener GPS');
