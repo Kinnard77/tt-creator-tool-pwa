@@ -322,20 +322,10 @@ export default function WalkerPage() {
 
       {/* Coordinates Bar */}
       <div className="px-4 py-2 bg-slate-900 border-y border-slate-800 shrink-0">
-        <div className="flex items-center justify-between">
-          <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
-            📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-            {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
-          </p>
-          {selectedUmbralId && (
-            <Link
-              href={`/composer/${selectedUmbralId}`}
-              className="text-xs bg-violet-600 px-2 py-1 rounded"
-            >
-              ✏️ Editar
-            </Link>
-          )}
-        </div>
+        <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
+          📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+          {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
+        </p>
       </div>
 
       {/* DROP Button */}
@@ -361,16 +351,20 @@ export default function WalkerPage() {
         ) : (
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => (
-              <Link
+              <div
                 key={u.id}
-                href={`/walker/${cathedralId}?umbral=${u.id}`}
                 className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
               >
                 <div className={`w-2 h-2 rounded-full ${u.type === 'umbra' ? 'bg-violet-500' : 'bg-amber-500'}`}></div>
                 <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
                 <span className="text-xs text-slate-500">{u.position.lat.toFixed(4)}, {u.position.lng.toFixed(4)}</span>
-                <span className="text-violet-400">→</span>
-              </Link>
+                <Link
+                  href={`/composer/${u.id}`}
+                  className="text-xs bg-violet-600 px-2 py-1 rounded"
+                >
+                  ✏️
+                </Link>
+              </div>
             ))}
           </div>
         )}
