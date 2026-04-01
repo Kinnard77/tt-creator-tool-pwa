@@ -51,6 +51,7 @@ export default function ComposerPage() {
   // Position for editing
   const [position, setPosition] = useState({ lat: 0, lng: 0 });
   const [cathedralId, setCathedralId] = useState<string | null>(null);
+  const [ciclo, setCiclo] = useState(1);
 
   const [loading, setLoading] = useState(true);
 
@@ -67,6 +68,8 @@ export default function ComposerPage() {
         setTriggerRadius(data.trigger_config?.radius || 5);
         setPosition(data.position || { lat: 0, lng: 0 });
         setCathedralId(data.cathedral_id);
+        // Load ciclo
+        setCiclo(data.experience_config?.ciclo || 1);
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -100,6 +103,7 @@ export default function ComposerPage() {
 
   const handleSave = async () => {
     const experience_config = {
+      ciclo, // Guardar el ciclo
       umbra: {
         type: umbraType,
         content: umbraContent,
