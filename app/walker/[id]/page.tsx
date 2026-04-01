@@ -64,12 +64,12 @@ export default function WalkerPage() {
         }
       }
 
-      // Fetch umbrales (más antiguo primero)
+      // Fetch umbrales (más reciente primero)
       const { data } = await supabase
         .from('umbrales')
         .select('*')
         .eq('cathedral_id', cathedralId)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(10);
       
       if (data) {
