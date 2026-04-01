@@ -75,13 +75,16 @@ export default function WalkerPage() {
         .limit(10);
       
       if (data) {
-        const mappedUmbrales = data.map((u: any) => ({
+        // Ordenar por node_number ASC para mantener orden consistente
+        const sortedData = [...data].sort((a, b) => (a.node_number || 0) - (b.node_number || 0));
+        
+        const mappedUmbrales = sortedData.map((u: any) => ({
           id: u.id,
           position: u.position,
           type: u.type,
           pacing_value: u.pacing_value,
           ciclo: u.experience_config?.ciclo || 1,
-          nodeNumber: u.node_number || 1 // Usar número guardado
+          nodeNumber: u.node_number || 1
         }));
         setRecentUmbrales(mappedUmbrales);
         
@@ -290,7 +293,7 @@ export default function WalkerPage() {
       <div className="flex-1 relative m-2 rounded-xl overflow-hidden border border-slate-800 min-h-[250px]">
         <MapComponent 
           center={location} 
-          umbrales={recentUmbrales.map((u, i) => ({ ...u, nodeNumber: i + 1 }))}
+          umbrales={recentUmbrales}
           floorPlanUrl={floorPlanUrl}
         />
         
