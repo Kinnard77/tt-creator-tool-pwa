@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import dynamic from 'next/dynamic';
@@ -27,7 +27,9 @@ const DEFAULT_LNG = -100.9326;
 
 export default function WalkerPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const cathedralId = params.id as string;
+  const selectedUmbralId = searchParams.get('umbral');
   
   const [location, setLocation] = useState({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
   const [isLocationLocked, setIsLocationLocked] = useState(false);
@@ -67,17 +69,26 @@ export default function WalkerPage() {
         .limit(10);
       
       if (data) {
-        setRecentUmbrales(data.map((u: any) => ({
+        const mappedUmbrales = data.map((u: any) => ({
           id: u.id,
           position: u.position,
           type: u.type,
           pacing_value: u.pacing_value
-        })));
+        }));
+        setRecentUmbrales(mappedUmbrales);
+        
+        // Si hay un nodo seleccionado, centrar el mapa en él
+        if (selectedUmbralId) {
+          const selected = data.find((u: any) => u.id === selectedUmbralId);
+          if (selected && selected.position) {
+            setLocation(selected.position);
+          }
+        }
       }
       setLoading(false);
     }
     fetchData();
-  }, [cathedralId]);
+  }, [cathedralId, selectedUmbralId]);
 
   // Get GPS only if user explicitly asks (button) - not automatic
   const requestGPS = () => {
@@ -306,10 +317,20 @@ export default function WalkerPage() {
 
       {/* Coordinates Bar */}
       <div className="px-4 py-2 bg-slate-900 border-y border-slate-800 shrink-0">
-        <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
-          📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-          {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
+            📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+            {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
+          </p>
+          {selectedUmbralId && (
+            <Link
+              href={`/composer/${selectedUmbralId}`}
+              className="text-xs bg-violet-600 px-2 py-1 rounded"
+            >
+              ✏️ Editar
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* DROP Button */}
@@ -337,7 +358,7 @@ export default function WalkerPage() {
             {recentUmbrales.map((u, i) => (
               <Link
                 key={u.id}
-                href={`/composer/${u.id}`}
+                href={`/walker/${cathedralId}?umbral=${u.id}`}
                 className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
               >
                 <div className={`w-2 h-2 rounded-full ${u.type === 'umbra' ? 'bg-violet-500' : 'bg-amber-500'}`}></div>
