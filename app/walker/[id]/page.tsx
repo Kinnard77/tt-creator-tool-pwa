@@ -64,12 +64,12 @@ export default function WalkerPage() {
         }
       }
 
-      // Fetch umbrales
+      // Fetch umbrales (más antiguo primero)
       const { data } = await supabase
         .from('umbrales')
         .select('*')
         .eq('cathedral_id', cathedralId)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true })
         .limit(10);
       
       if (data) {
@@ -356,7 +356,7 @@ export default function WalkerPage() {
                 className="flex items-center gap-2 p-2 bg-slate-900 rounded-lg hover:bg-slate-800"
               >
                 <div className={`w-2 h-2 rounded-full ${u.type === 'umbra' ? 'bg-violet-500' : 'bg-amber-500'}`}></div>
-                <span className="flex-1 text-xs">Umbral {i + 1}</span>
+                <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
                 <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                 <Link
                   href={`/composer/${u.id}`}
