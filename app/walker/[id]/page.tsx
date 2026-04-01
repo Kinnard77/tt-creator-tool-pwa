@@ -26,6 +26,7 @@ interface Umbral {
 const DEFAULT_LAT = 21.1583;
 const DEFAULT_LNG = -100.9326;
 
+// Walker page - UMBRA Creator Tool
 export default function WalkerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
