@@ -357,6 +357,7 @@ export default function WalkerPage() {
               >
                 <div className={`w-2 h-2 rounded-full ${u.type === 'umbra' ? 'bg-violet-500' : 'bg-amber-500'}`}></div>
                 <span className="flex-1 text-xs">Umbral {recentUmbrales.length - i}</span>
+                <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
                 <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                 <Link
                   href={`/composer/${u.id}`}

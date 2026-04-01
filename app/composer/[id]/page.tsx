@@ -176,7 +176,10 @@ export default function ComposerPage() {
         ) : (
           <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
         )}
-        <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
+        <div className="text-center">
+          <h1 className="text-violet-400 font-bold text-sm">✨ Composer</h1>
+          <p className="text-[10px] text-slate-500 font-mono">{umbralId}</p>
+        </div>
         <div className="flex gap-2">
           <button onClick={handleDelete} className="text-xs bg-red-600 px-2 py-1 rounded">🗑️ Eliminar</button>
           <button onClick={handleSave} className="text-xs bg-violet-600 px-3 py-1 rounded">Guardar</button>
