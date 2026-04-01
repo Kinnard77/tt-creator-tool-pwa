@@ -106,17 +106,33 @@ export default function AtlasPage() {
             const city = prompt('Ciudad:') || '';
             const country = prompt('País:') || '';
             
+            // Solicitar coordenadas
+            let lat = 0, lng = 0;
+            const latInput = prompt('Latitud (ej: 48.8530):');
+            const lngInput = prompt('Longitud (ej: 2.3499):');
+            
+            if (latInput && lngInput) {
+              lat = parseFloat(latInput) || 0;
+              lng = parseFloat(lngInput) || 0;
+            }
+            
             async function create() {
-              const { error } = await supabase.from('cathedrals').insert({
+              const { data, error } = await supabase.from('cathedrals').insert({
                 name,
                 city,
                 country,
-                coords: { lat: 0, lng: 0 },
+                coords: { lat, lng },
                 status: 'draft',
-                umbral_count: 0
-              });
-              if (error) alert('Error: ' + error.message);
-              else window.location.reload();
+                umbral_count: 0,
+                location_locked: true  // Fijar ubicación inmediatamente
+              }).select().single();
+              
+              if (error) {
+                alert('Error: ' + error.message);
+              } else {
+                // Redirigir a la nueva catedral
+                window.location.href = `/atlas/${data.id}`;
+              }
             }
             create();
           }}
