@@ -80,7 +80,8 @@ export default function WalkerPage() {
           position: u.position,
           type: u.type,
           pacing_value: u.pacing_value,
-          ciclo: u.experience_config?.ciclo || 1
+          ciclo: u.experience_config?.ciclo || 1,
+          nodeNumber: u.node_number || 1 // Usar número guardado
         }));
         setRecentUmbrales(mappedUmbrales);
         
@@ -125,6 +126,14 @@ export default function WalkerPage() {
       navigator.vibrate(100);
     }
 
+    // Obtener el siguiente número de nodo
+    const { count } = await supabase
+      .from('umbrales')
+      .select('*', { count: 'exact', head: true })
+      .eq('cathedral_id', cathedralId);
+    
+    const nextNodeNumber = (count || 0) + 1;
+
     const newUmbral = {
       cathedral_id: cathedralId,
       position: { lat: location.lat, lng: location.lng },
@@ -132,7 +141,8 @@ export default function WalkerPage() {
       experience_config: { type: 'text', content: '', ciclo: selectedCiclo },
       pacing_value: 5,
       type: 'umbra',
-      requires: []
+      requires: [],
+      node_number: nextNodeNumber // Guardar número permanente
     };
 
     const { data, error } = await supabase
@@ -153,7 +163,8 @@ export default function WalkerPage() {
         position: data.position,
         type: data.type,
         pacing_value: data.pacing_value,
-        ciclo: selectedCiclo
+        ciclo: selectedCiclo,
+        nodeNumber: nextNodeNumber
       }, ...prev.slice(0, 9)]);
     }
 
@@ -384,8 +395,7 @@ export default function WalkerPage() {
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => {
               const ciclo = u.ciclo || 1;
-              const nodeNumber = i + 1; // Más reciente = 1
-              const cicloColors = ['violet', 'blue', 'green', 'orange', 'red'];
+              const nodeNumber = u.nodeNumber || (i + 1); // Usar número permanente
               const colorClass = ciclo === 1 ? 'bg-violet-500' : ciclo === 2 ? 'bg-blue-500' : ciclo === 3 ? 'bg-green-500' : ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
               
               return (
