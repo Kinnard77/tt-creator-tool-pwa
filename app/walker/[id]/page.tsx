@@ -404,33 +404,30 @@ export default function WalkerPage() {
               const isSelected = selectedNodeId === u.id;
               
               return (
-                <div
+                <button
                   key={u.id}
-                  className={`flex items-center gap-2 p-2 rounded-lg transition-all ${
-                    isSelected ? 'bg-violet-900/60 border-2 border-violet-400' : 'bg-slate-900'
+                  type="button"
+                  onClick={() => {
+                    setSelectedNodeId(u.id);
+                    setLocation({ lat: u.position.lat, lng: u.position.lng });
+                  }}
+                  className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-all ${
+                    isSelected ? 'bg-violet-900/60 border-2 border-violet-400' : 'bg-slate-900 hover:bg-slate-800 border border-transparent'
                   }`}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedNodeId(u.id);
-                      setLocation({ lat: u.position.lat, lng: u.position.lng });
-                    }}
-                    className="flex-1 flex items-center gap-2 text-left"
-                  >
-                    <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
-                    <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
-                    <span className="text-xs text-slate-500">🌀{ciclo}</span>
-                    <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
-                    <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
-                  </button>
+                  <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
+                  <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
+                  <span className="text-xs text-slate-500">🌀{ciclo}</span>
+                  <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
+                  <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                   <Link
                     href={`/composer/${u.id}`}
-                    className="text-xs bg-slate-700 px-2 py-1 rounded"
+                    className="text-xs bg-slate-700 px-2 py-1 rounded ml-auto"
                   >
                     ✏️
                   </Link>
-                </div>
+                </button>
+              )}
               );
             })}
           </div>
