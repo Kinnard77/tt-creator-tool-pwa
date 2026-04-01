@@ -21,6 +21,7 @@ interface Umbral {
   type: 'umbra' | 'sigilum';
   pacing_value: number;
   ciclo?: number;
+  nodeNumber?: number;
 }
 
 const DEFAULT_LAT = 21.1583;
