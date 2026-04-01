@@ -142,16 +142,37 @@ export default function WalkerPage() {
     alert(`✓ UMBRAL CREADO\n\n📍 ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}`);
   };
 
+  // Ajustar posición solo si NO está fijada
   const adjustLocation = (deltaLat: number, deltaLng: number) => {
-    setIsLocationLocked(true);
+    if (isLocationLocked) return; // No permitir si está fijada
     setLocation(prev => ({
       lat: prev.lat + deltaLat,
       lng: prev.lng + deltaLng
     }));
   };
 
-  const lockLocation = () => setIsLocationLocked(true);
-  const unlockLocation = () => setIsLocationLocked(false);
+  // Fijar la ubicación de la catedral (una vez fijada, no se puede mover)
+  const toggleLock = () => {
+    if (!isLocationLocked) {
+      // Fijar - guardar las coords actuales en la catedral
+      setIsLocationLocked(true);
+      // Guardar en la DB
+      supabase
+        .from('cathedrals')
+        .update({ coords: location })
+        .eq('id', cathedralId)
+        .then(({ error }) => {
+          if (error) {
+            alert('Error al guardar: ' + error.message);
+          } else {
+            // No mostrar alert, solo dejar fijada la ubicación
+          }
+        });
+    } else {
+      // Desfijar (solo si está desbloqueado el desarrollo)
+      setIsLocationLocked(false);
+    }
+  };
 
   const saveFloorPlanUrl = async () => {
     if (!floorPlanUrl) return;
@@ -184,9 +205,9 @@ export default function WalkerPage() {
             📡
           </button>
           <button 
-            onClick={() => setIsLocationLocked(!isLocationLocked)}
+            onClick={toggleLock}
             className={`text-xs px-2 py-1 rounded ${isLocationLocked ? 'bg-emerald-600' : 'bg-amber-600'}`}
-            title={isLocationLocked ? "Desbloquear posición" : "Bloquear posición"}
+            title={isLocationLocked ? "Ubicación fijada" : "Fijar ubicación"}
           >
             {isLocationLocked ? '🔒' : '🔓'}
           </button>
@@ -246,6 +267,7 @@ export default function WalkerPage() {
         <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded-lg flex flex-col gap-1 w-20">
           <button 
             onClick={() => {
+              if (isLocationLocked) return; // No permitir si está fijada
               const lat = prompt('Latitud (ej: 43.7696):');
               const lng = prompt('Longitud (ej: 11.2558):');
               if (lat && lng) {
@@ -284,9 +306,9 @@ export default function WalkerPage() {
 
       {/* Coordinates Bar */}
       <div className="px-4 py-2 bg-slate-900 border-y border-slate-800 shrink-0">
-        <p className="text-xs font-mono text-slate-500">
+        <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
           📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-          {isLocationLocked && <span className="text-emerald-400 ml-2">🔒</span>}
+          {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
         </p>
       </div>
 
