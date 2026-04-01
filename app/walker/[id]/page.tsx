@@ -407,16 +407,17 @@ export default function WalkerPage() {
                 <div
                   key={u.id}
                   onClick={() => {
+                    console.log('Selected node:', u.id, 'position:', u.position);
                     setSelectedNodeId(u.id);
-                    setLocation(u.position);
+                    setLocation({ lat: u.position.lat, lng: u.position.lng });
                   }}
                   className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all ${
-                    isSelected ? 'bg-violet-900/50 border border-violet-500' : 'bg-slate-900 hover:bg-slate-800'
+                    isSelected ? 'bg-violet-900/60 border-2 border-violet-400 shadow-lg shadow-violet-500/20' : 'bg-slate-900 hover:bg-slate-800'
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full ${colorClass}`}></div>
-                  <span className="text-xs text-slate-400">🌀{ciclo}</span>
-                  <span className="flex-1 text-xs">Umbral {nodeNumber}</span>
+                  <div className={`w-3 h-3 rounded-full ${colorClass} ${isSelected ? 'ring-2 ring-white' : ''}`}></div>
+                  <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
+                  <span className="text-xs text-slate-500">🌀{ciclo}</span>
                   <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
                   <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                   <Link
