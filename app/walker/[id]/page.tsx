@@ -52,7 +52,10 @@ export default function WalkerPage() {
       
       if (cath) {
         setCathedral(cath);
-        if (cath.coords) {
+        if (cath.coords && (cath.coords.lat !== 0 || cath.coords.lng !== 0)) {
+          setLocation(cath.coords);
+          setIsLocationLocked(true); // Auto-fijar si tiene coordenadas reales
+        } else if (cath.coords) {
           setLocation(cath.coords);
         }
         if (cath.floor_plan_url) {

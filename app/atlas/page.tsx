@@ -123,8 +123,7 @@ export default function AtlasPage() {
                 country,
                 coords: { lat, lng },
                 status: 'draft',
-                umbral_count: 0,
-                location_locked: true  // Fijar ubicación inmediatamente
+                umbral_count: 0
               }).select().single();
               
               if (error) {
