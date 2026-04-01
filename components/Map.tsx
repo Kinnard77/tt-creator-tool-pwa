@@ -151,7 +151,8 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
         {/* Umbral markers with ciclo colors */}
         {umbrales.map((u, i) => {
           const nodeNumber = i + 1;
-          const ciclo = u.experience_config?.ciclo || 1;
+          // Buscar ciclo en experience_config o directamente en el objeto
+          const ciclo = u.experience_config?.ciclo || (u as any).ciclo || 1;
           const icon = (window as any).createNumberIcon 
             ? (window as any).createNumberIcon(nodeNumber, ciclo)
             : undefined;
