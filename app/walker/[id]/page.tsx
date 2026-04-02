@@ -14,7 +14,7 @@ const MapComponent = dynamic(() => import('@/components/Map'), {
 interface Umbral {
   id: string;
   position: { lat: number; lng: number };
-  type: string;
+  type: 'umbra' | 'sigilum';
   pacing_value: number;
   ciclo: number;
   nodeNumber: number;
@@ -59,7 +59,7 @@ export default function WalkerPage() {
         setRecentUmbrales(sorted.map((u: any) => ({
           id: u.id,
           position: u.position,
-          type: u.type,
+          type: u.type as 'umbra' | 'sigilum',
           pacing_value: u.pacing_value,
           ciclo: u.experience_config?.ciclo || 1,
           nodeNumber: u.node_number || 1
