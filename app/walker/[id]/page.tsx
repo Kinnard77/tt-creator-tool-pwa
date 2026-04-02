@@ -46,6 +46,8 @@ export default function WalkerPage() {
   const [floorPlanUrl, setFloorPlanUrl] = useState('');
   const [selectedCiclo, setSelectedCiclo] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeData, setSelectedNodeData] = useState<any>(null);
+  const [showNodeModal, setShowNodeModal] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -377,8 +379,9 @@ export default function WalkerPage() {
                   key={u.id}
                   type="button"
                   onClick={() => {
-                    console.log("CLICK en nodo:", u.id);
                     setSelectedNodeId(u.id);
+                    setSelectedNodeData(u);
+                    setShowNodeModal(true);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
                   }}
                   className="w-full flex items-center gap-2 p-2 rounded-lg text-left bg-slate-900 hover:bg-slate-800 border border-transparent"
@@ -400,6 +403,79 @@ export default function WalkerPage() {
           </div>
         )}
       </div>
+
+      {/* Node Detail Modal */}
+      {showNodeModal && selectedNodeData && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: '#1e293b',
+            borderRadius: '16px',
+            padding: '20px',
+            width: '90%',
+            maxWidth: '400px',
+            border: '1px solid #475569'
+          }}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px'}}>
+              <h3 style={{color:'#a855f7', fontSize:'18px', fontWeight:'bold'}}>
+                Umbral {selectedNodeData.nodeNumber}
+              </h3>
+              <button 
+                onClick={() => setShowNodeModal(false)}
+                style={{color:'#94a3b8', background:'none', border:'none', fontSize:'20px', cursor:'pointer'}}
+              >✕</button>
+            </div>
+            
+            <div style={{marginBottom:'16px'}}>
+              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Ciclo</p>
+              <p style={{color:'#fff', fontSize:'16px'}}>🌀 {selectedNodeData.ciclo}</p>
+            </div>
+            
+            <div style={{marginBottom:'16px'}}>
+              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Pacing</p>
+              <p style={{color:'#fff', fontSize:'16px'}}>⚡ {selectedNodeData.pacing_value}</p>
+            </div>
+            
+            <div style={{marginBottom:'16px'}}>
+              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Ubicacion</p>
+              <p style={{color:'#fff', fontSize:'14px', fontFamily:'monospace'}}>
+                {selectedNodeData.position.lat.toFixed(6)}, {selectedNodeData.position.lng.toFixed(6)}
+              </p>
+            </div>
+            
+            <div style={{marginBottom:'16px'}}>
+              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Tipo</p>
+              <p style={{color:'#fff', fontSize:'14px'}}>{selectedNodeData.type}</p>
+            </div>
+            
+            <Link 
+              href={"/composer/" + selectedNodeData.id}
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                backgroundColor: '#7c3aed',
+                color: 'white',
+                padding: '12px',
+                borderRadius: '8px',
+                fontWeight: 'bold',
+                textDecoration: 'none'
+              }}
+            >
+              ✏️ Editar en Composer
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
