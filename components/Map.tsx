@@ -165,27 +165,25 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
               icon={icon}
             >
               <Popup>
-                <div style={{ textAlign: 'center', padding: '5px', minWidth: '120px' }}>
-                  <strong style={{ fontSize: '14px' }}>Umbral {nodeNumber}</strong><br/>
-                  <span style={{ fontSize: '11px', color: '#666' }}>🌀 Ciclo {ciclo}</span><br/>
-                  <span style={{ fontSize: '11px' }}>Pacing: {u.pacing_value}/10</span>
-                  <div style={{ marginTop: '8px' }}>
-                    <a 
-                      href={'/composer/' + u.id}
-                      style={{ 
-                        display: 'inline-block', 
-                        padding: '6px 12px', 
-                        backgroundColor: '#7c3aed', 
-                        color: 'white', 
-                        textDecoration: 'none',
-                        borderRadius: '4px',
-                        fontSize: '11px',
-                        fontWeight: 'bold'
-                      }}
-                    >
-                      ✏️ Editar
-                    </a>
-                  </div>
+                <div style={{ textAlign: 'center', padding: '4px', minWidth: '100px' }}>
+                  <strong style={{ fontSize: '14px' }}>Umbral {nodeNumber}</strong>
+                  <div style={{ fontSize: '11px', color: '#666', margin: '2px 0' }}>🌀 Ciclo {ciclo}</div>
+                  <div style={{ fontSize: '11px', marginBottom: '6px' }}>Pacing: {u.pacing_value}/10</div>
+                  <a 
+                    href={'/composer/' + u.id}
+                    style={{ 
+                      display: 'inline-block', 
+                      padding: '4px 10px', 
+                      backgroundColor: '#7c3aed', 
+                      color: 'white', 
+                      textDecoration: 'none',
+                      borderRadius: '3px',
+                      fontSize: '11px',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    ✏️ Editar
+                  </a>
                 </div>
               </Popup>
             </Marker>
