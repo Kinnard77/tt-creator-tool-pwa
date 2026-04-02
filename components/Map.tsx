@@ -120,6 +120,7 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
         zoom={19}
         style={{ height, width: '100%', minHeight: '250px' }}
         scrollWheelZoom={true}
+        zoomControl={false}
       >
         <TileLayer
           attribution='&copy; OSM'
@@ -165,24 +166,23 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
               icon={icon}
             >
               <Popup>
-                <div style={{ textAlign: 'center', padding: '4px', minWidth: '100px' }}>
-                  <strong style={{ fontSize: '14px' }}>Umbral {nodeNumber}</strong>
-                  <div style={{ fontSize: '11px', color: '#666', margin: '2px 0' }}>🌀 Ciclo {ciclo}</div>
-                  <div style={{ fontSize: '11px', marginBottom: '6px' }}>Pacing: {u.pacing_value}/10</div>
+                <div style={{ textAlign: 'center', padding: '2px', minWidth: '80px' }}>
+                  <strong style={{ fontSize: '13px' }}>Umbral {nodeNumber}</strong>
+                  <div style={{ fontSize: '10px', color: '#666' }}>Ciclo {ciclo} | Pacing {u.pacing_value}</div>
                   <a 
                     href={'/composer/' + u.id}
                     style={{ 
                       display: 'inline-block', 
-                      padding: '4px 10px', 
+                      padding: '3px 8px', 
                       backgroundColor: '#7c3aed', 
                       color: 'white', 
                       textDecoration: 'none',
                       borderRadius: '3px',
-                      fontSize: '11px',
-                      fontWeight: 'bold'
+                      fontSize: '10px',
+                      marginTop: '4px'
                     }}
                   >
-                    ✏️ Editar
+                    Editar
                   </a>
                 </div>
               </Popup>
