@@ -56,7 +56,7 @@ export default function AtlasPage() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-violet-400 font-bold text-sm uppercase tracking-widest">The Atlas</h2>
           <span className="text-xs text-slate-500 bg-slate-800/50 px-3 py-1 rounded-full">
-            {cathedral.length} sitios
+            {cathedrals.length} sitios
           </span>
         </div>
 
