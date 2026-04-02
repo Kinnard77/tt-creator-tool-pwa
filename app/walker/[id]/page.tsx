@@ -404,76 +404,69 @@ export default function WalkerPage() {
         )}
       </div>
 
-      {/* Node Detail Modal */}
+      {/* Node Detail Modal - Bottom Sheet */}
       {showNodeModal && selectedNodeData && (
         <div style={{
           position: 'fixed',
-          top: 0,
+          bottom: 0,
           left: 0,
           right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999
+          backgroundColor: '#1e293b',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          padding: '20px',
+          border: '1px solid #475569',
+          zIndex: 9999,
+          maxHeight: '50vh',
+          overflowY: 'auto'
         }}>
-          <div style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '16px',
-            padding: '20px',
-            width: '90%',
-            maxWidth: '400px',
-            border: '1px solid #475569'
-          }}>
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px'}}>
-              <h3 style={{color:'#a855f7', fontSize:'18px', fontWeight:'bold'}}>
-                Umbral {selectedNodeData.nodeNumber}
-              </h3>
-              <button 
-                onClick={() => setShowNodeModal(false)}
-                style={{color:'#94a3b8', background:'none', border:'none', fontSize:'20px', cursor:'pointer'}}
-              >✕</button>
+          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px'}}>
+            <h3 style={{color:'#a855f7', fontSize:'18px', fontWeight:'bold'}}>
+              Umbral {selectedNodeData.nodeNumber}
+            </h3>
+            <button 
+              onClick={() => setShowNodeModal(false)}
+              style={{color:'#94a3b8', background:'none', border:'none', fontSize:'20px', cursor:'pointer'}}
+            >✕</button>
+          </div>
+          
+          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px'}}>
+            <div>
+              <p style={{color:'#64748b', fontSize:'10px'}}>Ciclo</p>
+              <p style={{color:'#fff', fontSize:'14px'}}>🌀 {selectedNodeData.ciclo}</p>
             </div>
-            
-            <div style={{marginBottom:'16px'}}>
-              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Ciclo</p>
-              <p style={{color:'#fff', fontSize:'16px'}}>🌀 {selectedNodeData.ciclo}</p>
+            <div>
+              <p style={{color:'#64748b', fontSize:'10px'}}>Pacing</p>
+              <p style={{color:'#fff', fontSize:'14px'}}>⚡ {selectedNodeData.pacing_value}</p>
             </div>
-            
-            <div style={{marginBottom:'16px'}}>
-              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Pacing</p>
-              <p style={{color:'#fff', fontSize:'16px'}}>⚡ {selectedNodeData.pacing_value}</p>
-            </div>
-            
-            <div style={{marginBottom:'16px'}}>
-              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Ubicacion</p>
-              <p style={{color:'#fff', fontSize:'14px', fontFamily:'monospace'}}>
-                {selectedNodeData.position.lat.toFixed(6)}, {selectedNodeData.position.lng.toFixed(6)}
+            <div style={{gridColumn:'span 2'}}>
+              <p style={{color:'#64748b', fontSize:'10px'}}>Ubicacion</p>
+              <p style={{color:'#fff', fontSize:'12px', fontFamily:'monospace'}}>
+                {selectedNodeData.position.lat.toFixed(5)}, {selectedNodeData.position.lng.toFixed(5)}
               </p>
             </div>
-            
-            <div style={{marginBottom:'16px'}}>
-              <p style={{color:'#64748b', fontSize:'12px', marginBottom:'4px'}}>Tipo</p>
-              <p style={{color:'#fff', fontSize:'14px'}}>{selectedNodeData.type}</p>
+            <div style={{gridColumn:'span 2'}}>
+              <p style={{color:'#64748b', fontSize:'10px'}}>Tipo</p>
+              <p style={{color:'#fff', fontSize:'12px'}}>{selectedNodeData.type}</p>
             </div>
-            
-            <Link 
-              href={"/composer/" + selectedNodeData.id}
-              style={{
-                display: 'block',
-                textAlign: 'center',
-                backgroundColor: '#7c3aed',
-                color: 'white',
-                padding: '12px',
-                borderRadius: '8px',
-                fontWeight: 'bold',
-                textDecoration: 'none'
-              }}
-            >
-              ✏️ Editar en Composer
-            </Link>
           </div>
+          
+          <Link 
+            href={"/composer/" + selectedNodeData.id}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              backgroundColor: '#7c3aed',
+              color: 'white',
+              padding: '12px',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              marginTop: '16px'
+            }}
+          >
+            ✏️ Editar en Composer
+          </Link>
         </div>
       )}
     </div>
