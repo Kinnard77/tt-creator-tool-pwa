@@ -41,9 +41,10 @@ interface MapProps {
   floorPlanUrl?: string;
   height?: string;
   showUserLocation?: boolean;
+  selectedId?: string | null;
 }
 
-export default function MapComponent({ center, umbrales = [], floorPlanUrl = '', height = '100%', showUserLocation = true }: MapProps) {
+export default function MapComponent({ center, umbrales = [], floorPlanUrl = '', height = '100%', showUserLocation = true, selectedId }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [centerKey, setCenterKey] = useState(0);
 
@@ -53,8 +54,11 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
     delete L.Icon.Default.prototype._getIconUrl;
     
     // Custom numbered icons with ciclo color (duotone)
-    const createNumberIcon = (num: number, ciclo: number = 1) => {
+    const createNumberIcon = (num: number, ciclo: number = 1, isSelected: boolean = false) => {
       const gradient = CICLO_COLORS[ciclo] || CICLO_COLORS[1];
+      const borderColor = isSelected ? '#a855f7' : 'white';
+      const borderWidth = isSelected ? '3px' : '2px';
+      const boxShadow = isSelected ? '0 0 15px #a855f7, 0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.3)';
       
       return L.divIcon({
         html: `<div style="
@@ -68,8 +72,8 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
           justify-content: center;
           font-weight: bold;
           font-size: 12px;
-          border: 2px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          border: ${borderWidth} solid ${borderColor};
+          box-shadow: ${boxShadow};
         ">${num}</div>`,
         className: 'numbered-marker',
         iconSize: [28, 28],
@@ -156,8 +160,9 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
           const nodeNumber = u.nodeNumber || (i + 1);
           // Buscar ciclo en experience_config o directamente en el objeto
           const ciclo = u.experience_config?.ciclo || (u as any).ciclo || 1;
+          const isSelected = selectedId === u.id;
           const icon = (window as any).createNumberIcon 
-            ? (window as any).createNumberIcon(nodeNumber, ciclo)
+            ? (window as any).createNumberIcon(nodeNumber, ciclo, isSelected)
             : undefined;
           return (
             <Marker 

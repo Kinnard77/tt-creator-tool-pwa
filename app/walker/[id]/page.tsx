@@ -133,7 +133,7 @@ export default function WalkerPage() {
       </header>
 
       <div className="flex-1 relative">
-        <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} />
+        <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} selectedId={selectedNodeId} />
       </div>
 
       <div className="px-4 py-2 bg-slate-900">
