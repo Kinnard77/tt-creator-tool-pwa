@@ -380,8 +380,10 @@ export default function WalkerPage() {
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
                   }}
-                  className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-all ${
-                    isSelected ? 'bg-violet-900/60 border-2 border-violet-400' : 'bg-slate-900 hover:bg-slate-800 border border-transparent'
+                  className={`w-full flex items-center gap-2 p-3 rounded-xl text-left transition-all ${
+                    isSelected 
+                      ? 'bg-gradient-to-r from-violet-600/40 to-purple-600/40 border-2 border-violet-400 shadow-lg shadow-violet-500/30 scale-[1.02]' 
+                      : 'bg-slate-900 hover:bg-slate-800 border border-transparent'
                   }`}
                 >
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
