@@ -1,8 +1,5 @@
 'use client';
 
-// UMBRA Creator Tool - Walker Page
-// This is a test to force a clean rebuild
-
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -11,20 +8,16 @@ import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
   ssr: false,
-  loading: () => (
-    <div className="h-full bg-slate-900 flex items-center justify-center">
-      <p className="text-slate-500">Cargando mapa...</p>
-    </div>
-  )
+  loading: () => <div className="h-full bg-slate-900 flex items-center justify-center"><p className="text-slate-500">Cargando...</p></div>
 });
 
 interface Umbral {
   id: string;
   position: { lat: number; lng: number };
-  type: 'umbra' | 'sigilum';
+  type: string;
   pacing_value: number;
-  ciclo?: number;
-  nodeNumber?: number;
+  ciclo: number;
+  nodeNumber: number;
 }
 
 const DEFAULT_LAT = 21.1583;
@@ -34,107 +27,67 @@ export default function WalkerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const cathedralId = params.id as string;
-  const selectedUmbralId = searchParams.get('umbral');
   
   const [location, setLocation] = useState({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
   const [isLocationLocked, setIsLocationLocked] = useState(false);
   const [recentUmbrales, setRecentUmbrales] = useState<Umbral[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [cathedral, setCathedral] = useState<any>(null);
-  const [showFloorPlanInput, setShowFloorPlanInput] = useState(false);
   const [floorPlanUrl, setFloorPlanUrl] = useState('');
+  const [showFloorPlanInput, setShowFloorPlanInput] = useState(false);
   const [selectedCiclo, setSelectedCiclo] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const { data: cath } = await supabase
-        .from('cathedrals')
-        .select('*')
-        .eq('id', cathedralId)
-        .single();
+      const { data: cath } = await supabase.from('cathedrals').select('*').eq('id', cathedralId).single();
       
       if (cath) {
-        setCathedral(cath);
         if (cath.coords && (cath.coords.lat !== 0 || cath.coords.lng !== 0)) {
           setLocation(cath.coords);
           setIsLocationLocked(true);
         } else if (cath.coords) {
           setLocation(cath.coords);
-          setIsLocationLocked(false);
         }
-        if (cath.floor_plan_url) {
-          setFloorPlanUrl(cath.floor_plan_url);
-        }
+        if (cath.floor_plan_url) setFloorPlanUrl(cath.floor_plan_url);
       }
 
-      const { data } = await supabase
-        .from('umbrales')
-        .select('*')
-        .eq('cathedral_id', cathedralId)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const { data } = await supabase.from('umbrales').select('*').eq('cathedral_id', cathedralId).order('created_at', { ascending: false }).limit(10);
       
       if (data) {
-        const sortedData = [...data].sort((a, b) => (a.node_number || 0) - (b.node_number || 0));
-        
-        const mappedUmbrales = sortedData.map((u: any) => ({
+        const sorted = [...data].sort((a, b) => (a.node_number || 0) - (b.node_number || 0));
+        setRecentUmbrales(sorted.map((u: any) => ({
           id: u.id,
           position: u.position,
           type: u.type,
           pacing_value: u.pacing_value,
           ciclo: u.experience_config?.ciclo || 1,
           nodeNumber: u.node_number || 1
-        }));
-        setRecentUmbrales(mappedUmbrales);
-        
-        if (selectedUmbralId) {
-          const selected = data.find((u: any) => u.id === selectedUmbralId);
-          if (selected && selected.position) {
-            setLocation(selected.position);
-          }
-        }
+        })));
       }
       setLoading(false);
     }
     fetchData();
-  }, [cathedralId, selectedUmbralId]);
+  }, [cathedralId]);
 
   const requestGPS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        () => {
-          alert('No se pudo obtener GPS');
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
+        (p) => setLocation({ lat: p.coords.latitude, lng: p.coords.longitude }),
+        () => alert('GPS no disponible'),
+        { enableHighAccuracy: true }
       );
-    } else {
-      alert('GPS no disponible en este dispositivo');
     }
   };
 
   const handleDropUmbral = async () => {
     setSaving(true);
+    if (navigator.vibrate) navigator.vibrate(100);
 
-    if (navigator.vibrate) {
-      navigator.vibrate(100);
-    }
-
-    const { count } = await supabase
-      .from('umbrales')
-      .select('*', { count: 'exact', head: true })
-      .eq('cathedral_id', cathedralId);
-    
+    const { count } = await supabase.from('umbrales').select('*', { count: 'exact', head: true }).eq('cathedral_id', cathedralId);
     const nextNodeNumber = (count || 0) + 1;
 
-    const newUmbral = {
+    const { data, error } = await supabase.from('umbrales').insert({
       cathedral_id: cathedralId,
       position: { lat: location.lat, lng: location.lng },
       trigger_config: { type: 'geo_radius', radius: 5 },
@@ -143,263 +96,89 @@ export default function WalkerPage() {
       type: 'umbra',
       requires: [],
       node_number: nextNodeNumber
-    };
+    }).select().single();
 
-    const { data, error } = await supabase
-      .from('umbrales')
-      .insert(newUmbral)
-      .select()
-      .single();
-
-    if (error) {
-      alert('Error al guardar: ' + error.message);
-      setSaving(false);
-      return;
+    if (!error && data) {
+      setRecentUmbrales(prev => [{ id: data.id, position: data.position, type: data.type, pacing_value: data.pacing_value, ciclo: selectedCiclo, nodeNumber: nextNodeNumber }, ...prev.slice(0, 9)]);
     }
-
-    if (data) {
-      setRecentUmbrales(prev => [{
-        id: data.id,
-        position: data.position,
-        type: data.type,
-        pacing_value: data.pacing_value,
-        ciclo: selectedCiclo,
-        nodeNumber: nextNodeNumber
-      }, ...prev.slice(0, 9)]);
-    }
-
     setSaving(false);
-    
-    alert("+ UMBRAL CREADO\n\n" + location.lat.toFixed(6) + ", " + location.lng.toFixed(6));
+    alert('Nodo creado');
   };
 
-  const adjustLocation = (deltaLat: number, deltaLng: number) => {
+  const adjustLocation = (dLat: number, dLng: number) => {
     if (isLocationLocked) return;
-    setLocation(prev => ({
-      lat: prev.lat + deltaLat,
-      lng: prev.lng + deltaLng
-    }));
+    setLocation(prev => ({ lat: prev.lat + dLat, lng: prev.lng + dLng }));
   };
 
   const toggleLock = () => {
     if (!isLocationLocked) {
       setIsLocationLocked(true);
-      supabase
-        .from('cathedrals')
-        .update({ coords: location })
-        .eq('id', cathedralId)
-        .then(({ error }) => {
-          if (error) {
-            alert('Error al guardar: ' + error.message);
-          }
-        });
+      supabase.from('cathedrals').update({ coords: location }).eq('id', cathedralId);
     } else {
       setIsLocationLocked(false);
     }
   };
 
-  const saveFloorPlanUrl = async () => {
-    if (!floorPlanUrl) return;
-    
-    const { error } = await supabase
-      .from('cathedrals')
-      .update({ floor_plan_url: floorPlanUrl })
-      .eq('id', cathedralId);
-    
-    if (error) {
-      alert('Error al guardar: ' + error.message);
-    } else {
-      alert('Plano guardado');
-      setShowFloorPlanInput(false);
-    }
-  };
-
   return (
     <div className="h-screen flex flex-col bg-black text-white">
-      {/* Header */}
-      <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between shrink-0">
-        <Link href={"/atlas/" + cathedralId} className="text-violet-400 hover:underline text-sm">← Volver</Link>
-        <h1 className="text-violet-400 font-bold text-sm">🚶 The Walker</h1>
+      <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between">
+        <Link href={'/atlas/' + cathedralId} className="text-violet-400 text-sm">← Volver</Link>
+        <h1 className="text-violet-400 font-bold text-sm">The Walker</h1>
         <div className="flex gap-2">
-          <button 
-            onClick={requestGPS}
-            className="text-xs bg-blue-700 px-2 py-1 rounded"
-            title="Obtener GPS actual"
-          >
-            📡 GPS
-          </button>
-          <button 
-            onClick={toggleLock}
-            className={`text-xs px-2 py-1 rounded ${isLocationLocked ? 'bg-emerald-600' : 'bg-amber-600'}`}
-            title={isLocationLocked ? "Ubicacion fijada" : "Fijar ubicacion"}
-          >
+          <button onClick={requestGPS} className="text-xs bg-blue-700 px-2 py-1 rounded">GPS</button>
+          <button onClick={toggleLock} className={`text-xs px-2 py-1 rounded ${isLocationLocked ? 'bg-emerald-600' : 'bg-amber-600'}`}>
             {isLocationLocked ? '🔒' : '🔓'}
-          </button>
-          <button 
-            onClick={() => {
-              const lat = prompt('Latitud (ej: 43.7696):');
-              const lng = prompt('Longitud (ej: 11.2558):');
-              if (lat && lng) {
-                const latVal = parseFloat(lat);
-                const lngVal = parseFloat(lng);
-                if (!isNaN(latVal) && !isNaN(lngVal)) {
-                  setLocation({ lat: latVal, lng: lngVal });
-                }
-              }
-            }}
-            className="text-xs bg-slate-700 px-2 py-1 rounded"
-          >
-            SET
           </button>
         </div>
       </header>
 
-      {/* Plano de planta toggle */}
-      <div className="px-3 py-2 bg-slate-800 border-b border-slate-700 shrink-0">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">📐 Plano de planta</span>
-          <button 
-            onClick={() => setShowFloorPlanInput(!showFloorPlanInput)}
-            className="text-xs text-violet-400"
-          >
-            {showFloorPlanInput ? 'Ocultar' : 'Mostrar'}
-          </button>
-        </div>
-        {showFloorPlanInput && (
-          <div className="mt-2">
-            <input
-              type="text"
-              value={floorPlanUrl}
-              onChange={(e) => setFloorPlanUrl(e.target.value)}
-              placeholder="URL de la imagen del plano..."
-              className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs mb-2"
-            />
-            <div className="flex gap-2">
-              <button 
-                onClick={saveFloorPlanUrl}
-                className="bg-violet-600 px-3 py-1 rounded text-xs"
-              >
-                Guardar URL
-              </button>
-              <button 
-                onClick={() => setFloorPlanUrl('')}
-                className="bg-slate-700 px-3 py-1 rounded text-xs"
-              >
-                Borrar
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Map */}
       <div className="flex-1 relative">
-        <MapComponent 
-          center={location} 
-          umbrales={recentUmbrales}
-          floorPlanUrl={floorPlanUrl}
-        />
-        
-        {/* Precision controls */}
-        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded-lg flex flex-col gap-1 w-20">
+        <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} />
+        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded flex flex-col gap-1 w-16">
           <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▲</button>
           <div className="flex gap-1">
-            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs flex-1">◄</button>
-            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs flex-1">►</button>
+            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">◄</button>
+            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">►</button>
           </div>
           <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▼</button>
-          <p className="text-[10px] text-slate-500 text-center">+1m</p>
         </div>
       </div>
 
-      {/* Coordinates Bar */}
-      <div className="px-4 py-2 bg-slate-900 border-y border-slate-800 shrink-0">
+      <div className="px-4 py-2 bg-slate-900">
         <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
-          📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-          {isLocationLocked && <span className="ml-2">✓ Fijada</span>}
+          {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
         </p>
       </div>
 
-      {/* Ciclo selector */}
-      <div className="px-3 py-2 bg-slate-800 border-y border-slate-700 shrink-0">
-        <p className="text-xs text-slate-500 mb-2">Selecciona el puzzle/ciclo</p>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map(c => (
-            <button
-              key={c}
-              onClick={() => setSelectedCiclo(c)}
-              className={`flex-1 py-2 rounded text-xs font-bold ${
-                selectedCiclo === c 
-                  ? c === 1 ? 'bg-violet-600' 
-                  : c === 2 ? 'bg-blue-600'
-                  : c === 3 ? 'bg-green-600'
-                  : c === 4 ? 'bg-orange-600'
-                  : 'bg-red-600'
-                  : 'bg-slate-700'
-              }`}
-            >
-              🌀 {c}
-            </button>
-          ))}
-        </div>
+      <div className="px-3 py-2 bg-slate-800 flex gap-2">
+        {[1,2,3,4,5].map(c => (
+          <button key={c} onClick={() => setSelectedCiclo(c)} className={`flex-1 py-2 rounded text-xs font-bold ${selectedCiclo === c ? (c===1?'bg-violet-600':c===2?'bg-blue-600':c===3?'bg-green-600':c===4?'bg-orange-600':'bg-red-600') : 'bg-slate-700'}`}>Ciclo {c}</button>
+        ))}
       </div>
 
-      {/* DROP Button */}
-      <div className="p-3 shrink-0">
-        <button 
-          onClick={handleDropUmbral}
-          disabled={saving}
-          className={`w-full py-4 rounded-xl text-white font-bold text-lg tracking-widest shadow-lg transition-all ${
-            saving ? 'bg-slate-700 cursor-wait' : 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-violet-600/30 hover:from-violet-500 hover:to-purple-500'
-          }`}
-        >
+      <div className="p-3">
+        <button onClick={handleDropUmbral} disabled={saving} className="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl font-bold">
           {saving ? 'Guardando...' : '+ DROP UMBRAL PUZZLE'}
         </button>
       </div>
 
-      {/* Node list */}
-      <div className="px-4 pb-3 overflow-y-auto max-h-[20vh] shrink-0">
-        <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Ultimos nodos</p>
-        {loading ? (
-          <p className="text-slate-600">Cargando...</p>
-        ) : recentUmbrales.length === 0 ? (
-          <p className="text-slate-600 text-sm">No hay umbrales. Crea el primero!</p>
-        ) : (
+      <div className="px-4 pb-4 overflow-y-auto max-h-[20vh]">
+        <p className="text-xs text-slate-500 mb-2">Ultimos nodos</p>
+        {loading ? <p className="text-slate-600">Cargando...</p> : recentUmbrales.length === 0 ? <p className="text-slate-600">No hay nodos</p> : (
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => {
-              const ciclo = u.ciclo || 1;
-              const nodeNumber = u.nodeNumber || (i + 1);
-              const colorClass = ciclo === 1 ? 'bg-violet-500' : ciclo === 2 ? 'bg-blue-500' : ciclo === 3 ? 'bg-green-500' : ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
-              const isSelected = selectedNodeId === u.id;
-              
+              const colorClass = u.ciclo === 1 ? 'bg-violet-500' : u.ciclo === 2 ? 'bg-blue-500' : u.ciclo === 3 ? 'bg-green-500' : u.ciclo === 4 ? 'bg-orange-500' : 'bg-red-500';
               return (
-                <button
-                  key={u.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedNodeId(u.id);
-                    setLocation({ lat: u.position.lat, lng: u.position.lng });
-                  }}
-                  className="w-full flex items-center gap-2 p-2 rounded-lg text-left bg-slate-900 hover:bg-slate-800 border border-transparent"
-                >
+                <button key={u.id} type="button" onClick={() => { setSelectedNodeId(u.id); setLocation(u.position); }} className="w-full flex items-center gap-2 p-2 rounded-lg text-left bg-slate-900 hover:bg-slate-800">
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
-                  <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
-                  <span className="text-xs text-slate-500">🌀{ciclo}</span>
-                  <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
-                  <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
-                  <Link
-                    href={"/composer/" + u.id}
-                    className="text-xs bg-slate-700 px-2 py-1 rounded ml-auto"
-                  >
-                    ✏️
-                  </Link>
+                  <span className="text-xs text-slate-300">Umbral {u.nodeNumber}</span>
+                  <span className="text-xs text-slate-500">C{u.ciclo}</span>
+                  <Link href={'/composer/' + u.id} className="text-xs bg-slate-700 px-2 py-1 rounded ml-auto">Editar</Link>
                 </button>
               );
             })}
           </div>
         )}
-      </div>
-
       </div>
     </div>
   );
