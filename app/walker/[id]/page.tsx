@@ -377,13 +377,14 @@ export default function WalkerPage() {
                   key={u.id}
                   type="button"
                   onClick={() => {
-                    console.log("CLICK: selectedNodeId=", u.id, "isSelected=", selectedNodeId === u.id);
+                    console.log("CLICK:", u.id, "nodeNumber:", nodeNumber, "isSelected:", selectedNodeId === u.id);
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
+                    console.log("AFTER SET:", "selectedNodeId now:", u.id);
                   }}
                   style={{
-                    backgroundColor: isSelected ? '#7c3aed' : '#0f172a',
-                    border: isSelected ? '3px solid #a855f7' : '1px solid #334155',
+                    backgroundColor: (selectedNodeId === u.id) ? '#7c3aed' : '#0f172a',
+                    border: (selectedNodeId === u.id) ? '3px solid #a855f7' : '1px solid #334155',
                     padding: '12px',
                     borderRadius: '12px',
                     marginBottom: '4px',
