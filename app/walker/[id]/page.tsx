@@ -134,14 +134,7 @@ export default function WalkerPage() {
 
       <div className="flex-1 relative">
         <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} />
-        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded flex flex-col gap-1 w-16">
-          <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▲</button>
-          <div className="flex gap-1">
-            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">◄</button>
-            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">►</button>
-          </div>
-          <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▼</button>
-        </div>
+      </div>
       </div>
 
       <div className="px-4 py-2 bg-slate-900">
