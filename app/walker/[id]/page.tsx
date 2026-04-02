@@ -375,28 +375,13 @@ export default function WalkerPage() {
               return (
                 <button
                   key={u.id}
-                  id={"btn-nodo-" + u.id}
                   type="button"
-                  onClick={function() { 
+                  onClick={() => {
                     console.log("CLICK en nodo:", u.id);
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
-                    var btn = document.getElementById("btn-nodo-" + u.id);
-                    if(btn) { btn.style.backgroundColor = "#7c3aed"; btn.style.border = "3px solid #a855f7"; }
-                    console.log("Selected:", u.id, "Ahora selectedNodeId:", selectedNodeId);
                   }}
-                  style={{
-                    backgroundColor: '#0f172a',
-                    border: '1px solid #334155',
-                    padding: '12px',
-                    borderRadius: '12px',
-                    marginBottom: '4px',
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    color: 'white'
-                  }}
+                  className="w-full flex items-center gap-2 p-2 rounded-lg text-left bg-slate-900 hover:bg-slate-800 border border-transparent"
                 >
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
                   <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
