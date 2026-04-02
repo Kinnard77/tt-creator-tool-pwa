@@ -135,7 +135,6 @@ export default function WalkerPage() {
       <div className="flex-1 relative">
         <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} />
       </div>
-      </div>
 
       <div className="px-4 py-2 bg-slate-900">
         <p className={`text-xs font-mono ${isLocationLocked ? 'text-emerald-400' : 'text-slate-500'}`}>
