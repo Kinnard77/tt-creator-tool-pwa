@@ -375,23 +375,27 @@ export default function WalkerPage() {
               return (
                 <button
                   key={u.id}
+                  id={"btn-nodo-" + u.id}
                   type="button"
-                  onClick={() => {
-                    console.log("CLICK:", u.id, "nodeNumber:", nodeNumber, "isSelected:", selectedNodeId === u.id);
+                  onClick={function() { 
+                    console.log("CLICK en nodo:", u.id);
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
-                    console.log("AFTER SET:", "selectedNodeId now:", u.id);
+                    var btn = document.getElementById("btn-nodo-" + u.id);
+                    if(btn) { btn.style.backgroundColor = "#7c3aed"; btn.style.border = "3px solid #a855f7"; }
+                    console.log("Selected:", u.id, "Ahora selectedNodeId:", selectedNodeId);
                   }}
                   style={{
-                    backgroundColor: (selectedNodeId === u.id) ? '#7c3aed' : '#0f172a',
-                    border: (selectedNodeId === u.id) ? '3px solid #a855f7' : '1px solid #334155',
+                    backgroundColor: '#0f172a',
+                    border: '1px solid #334155',
                     padding: '12px',
                     borderRadius: '12px',
                     marginBottom: '4px',
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    color: 'white'
                   }}
                 >
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
