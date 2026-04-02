@@ -46,8 +46,6 @@ export default function WalkerPage() {
   const [floorPlanUrl, setFloorPlanUrl] = useState('');
   const [selectedCiclo, setSelectedCiclo] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [selectedNodeData, setSelectedNodeData] = useState<any>(null);
-  const [showNodeModal, setShowNodeModal] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
