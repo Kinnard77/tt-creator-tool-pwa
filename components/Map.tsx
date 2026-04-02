@@ -165,10 +165,27 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
               icon={icon}
             >
               <Popup>
-                <div style={{ textAlign: 'center', padding: '5px' }}>
-                  <strong>🌑 Nodo {nodeNumber}</strong><br/>
-                  <span style={{ fontSize: '10px' }}>🌀 Ciclo {ciclo}</span><br/>
-                  <span style={{ fontSize: '10px' }}>Pacing: {u.pacing_value}/10</span>
+                <div style={{ textAlign: 'center', padding: '5px', minWidth: '120px' }}>
+                  <strong style={{ fontSize: '14px' }}>Umbral {nodeNumber}</strong><br/>
+                  <span style={{ fontSize: '11px', color: '#666' }}>🌀 Ciclo {ciclo}</span><br/>
+                  <span style={{ fontSize: '11px' }}>Pacing: {u.pacing_value}/10</span>
+                  <div style={{ marginTop: '8px' }}>
+                    <a 
+                      href={'/composer/' + u.id}
+                      style={{ 
+                        display: 'inline-block', 
+                        padding: '6px 12px', 
+                        backgroundColor: '#7c3aed', 
+                        color: 'white', 
+                        textDecoration: 'none',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ✏️ Editar
+                    </a>
+                  </div>
                 </div>
               </Popup>
             </Marker>
