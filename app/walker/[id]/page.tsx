@@ -1,5 +1,8 @@
 'use client';
 
+// UMBRA Creator Tool - Walker Page
+// This is a test to force a clean rebuild
+
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -27,7 +30,6 @@ interface Umbral {
 const DEFAULT_LAT = 21.1583;
 const DEFAULT_LNG = -100.9326;
 
-// Walker page - UMBRA Creator Tool - UMBRA project - TEST
 export default function WalkerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -45,10 +47,8 @@ export default function WalkerPage() {
   const [selectedCiclo, setSelectedCiclo] = useState(1);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  // Fetch cathedral and umbrales
   useEffect(() => {
     async function fetchData() {
-      // Fetch cathedral
       const { data: cath } = await supabase
         .from('cathedrals')
         .select('*')
@@ -59,17 +59,16 @@ export default function WalkerPage() {
         setCathedral(cath);
         if (cath.coords && (cath.coords.lat !== 0 || cath.coords.lng !== 0)) {
           setLocation(cath.coords);
-          setIsLocationLocked(true); // Auto-fijar si tiene coordenadas reales
+          setIsLocationLocked(true);
         } else if (cath.coords) {
           setLocation(cath.coords);
-          setIsLocationLocked(false); // Permite ajustar si está en 0,0
+          setIsLocationLocked(false);
         }
         if (cath.floor_plan_url) {
           setFloorPlanUrl(cath.floor_plan_url);
         }
       }
 
-      // Fetch umbrales (más reciente primero)
       const { data } = await supabase
         .from('umbrales')
         .select('*')
@@ -78,7 +77,6 @@ export default function WalkerPage() {
         .limit(10);
       
       if (data) {
-        // Ordenar por node_number ASC para mantener orden consistente
         const sortedData = [...data].sort((a, b) => (a.node_number || 0) - (b.node_number || 0));
         
         const mappedUmbrales = sortedData.map((u: any) => ({
@@ -91,7 +89,6 @@ export default function WalkerPage() {
         }));
         setRecentUmbrales(mappedUmbrales);
         
-        // Si hay un nodo seleccionado, centrar el mapa en él
         if (selectedUmbralId) {
           const selected = data.find((u: any) => u.id === selectedUmbralId);
           if (selected && selected.position) {
@@ -104,7 +101,6 @@ export default function WalkerPage() {
     fetchData();
   }, [cathedralId, selectedUmbralId]);
 
-  // Get GPS only if user explicitly asks (button) - not automatic
   const requestGPS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -113,7 +109,6 @@ export default function WalkerPage() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
-          // No bloquear cuando obtiene GPS - permite crear nodos
         },
         () => {
           alert('No se pudo obtener GPS');
@@ -132,7 +127,6 @@ export default function WalkerPage() {
       navigator.vibrate(100);
     }
 
-    // Obtener el siguiente número de nodo
     const { count } = await supabase
       .from('umbrales')
       .select('*', { count: 'exact', head: true })
@@ -148,7 +142,7 @@ export default function WalkerPage() {
       pacing_value: 5,
       type: 'umbra',
       requires: [],
-      node_number: nextNodeNumber // Guardar número permanente
+      node_number: nextNodeNumber
     };
 
     const { data, error } = await supabase
@@ -176,24 +170,20 @@ export default function WalkerPage() {
 
     setSaving(false);
     
-    alert(`✓ UMBRAL CREADO\n\n📍 ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}`);
+    alert("+ UMBRAL CREADO\n\n" + location.lat.toFixed(6) + ", " + location.lng.toFixed(6));
   };
 
-  // Ajustar posición solo si NO está fijada
   const adjustLocation = (deltaLat: number, deltaLng: number) => {
-    if (isLocationLocked) return; // No permitir si está fijada
+    if (isLocationLocked) return;
     setLocation(prev => ({
       lat: prev.lat + deltaLat,
       lng: prev.lng + deltaLng
     }));
   };
 
-  // Fijar la ubicación de la catedral (una vez fijada, no se puede mover)
   const toggleLock = () => {
     if (!isLocationLocked) {
-      // Fijar - guardar las coords actuales en la catedral
       setIsLocationLocked(true);
-      // Guardar en la DB
       supabase
         .from('cathedrals')
         .update({ coords: location })
@@ -201,12 +191,9 @@ export default function WalkerPage() {
         .then(({ error }) => {
           if (error) {
             alert('Error al guardar: ' + error.message);
-          } else {
-            // No mostrar alert, solo dejar fijada la ubicación
           }
         });
     } else {
-      // Desfijar (solo si está desbloqueado el desarrollo)
       setIsLocationLocked(false);
     }
   };
@@ -222,7 +209,7 @@ export default function WalkerPage() {
     if (error) {
       alert('Error al guardar: ' + error.message);
     } else {
-      alert('✓ Plano guardado');
+      alert('Plano guardado');
       setShowFloorPlanInput(false);
     }
   };
@@ -239,105 +226,89 @@ export default function WalkerPage() {
             className="text-xs bg-blue-700 px-2 py-1 rounded"
             title="Obtener GPS actual"
           >
-            📡
+            📡 GPS
           </button>
           <button 
             onClick={toggleLock}
             className={`text-xs px-2 py-1 rounded ${isLocationLocked ? 'bg-emerald-600' : 'bg-amber-600'}`}
-            title={isLocationLocked ? "Ubicación fijada" : "Fijar ubicación"}
+            title={isLocationLocked ? "Ubicacion fijada" : "Fijar ubicacion"}
           >
             {isLocationLocked ? '🔒' : '🔓'}
           </button>
-        </div>
-      </header>
-
-      {/* Floor Plan Button */}
-      <div className="px-3 py-1 bg-slate-800 flex items-center justify-between">
-        <span className="text-xs text-slate-400">📐 Plano de planta</span>
-        <button 
-          onClick={() => setShowFloorPlanInput(!showFloorPlanInput)}
-          className="text-xs text-violet-400"
-        >
-          {floorPlanUrl ? '✓ Configurado' : '+ Agregar'}
-        </button>
-      </div>
-
-      {/* Floor Plan URL Input */}
-      {showFloorPlanInput && (
-        <div className="px-3 py-2 bg-slate-800 border-b border-slate-700">
-          <input
-            type="text"
-            value={floorPlanUrl}
-            onChange={(e) => setFloorPlanUrl(e.target.value)}
-            placeholder="URL de la imagen del plano..."
-            className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs mb-2"
-          />
-          <div className="flex gap-2">
-            <button 
-              onClick={saveFloorPlanUrl}
-              className="bg-violet-600 px-3 py-1 rounded text-xs"
-            >
-              Guardar URL
-            </button>
-            <button 
-              onClick={() => setFloorPlanUrl('')}
-              className="bg-slate-700 px-3 py-1 rounded text-xs"
-            >
-              Borrar
-            </button>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-1">
-            Sube la imagen a un hosting y pega la URL aquí
-          </p>
-        </div>
-      )}
-
-      {/* Map Area */}
-      <div className="flex-1 relative m-2 rounded-xl overflow-hidden border border-slate-800 min-h-[250px]">
-        <MapComponent 
-          center={location} 
-          umbrales={recentUmbrales}
-          floorPlanUrl={floorPlanUrl}
-        />
-        
-        {/* Precision controls - compact overlay */}
-        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded-lg flex flex-col gap-1 w-20">
           <button 
             onClick={() => {
-              if (isLocationLocked) return; // No permitir si está fijada
               const lat = prompt('Latitud (ej: 43.7696):');
               const lng = prompt('Longitud (ej: 11.2558):');
               if (lat && lng) {
                 const latVal = parseFloat(lat);
                 const lngVal = parseFloat(lng);
                 if (!isNaN(latVal) && !isNaN(lngVal)) {
-                  setIsLocationLocked(true);
                   setLocation({ lat: latVal, lng: lngVal });
                 }
               }
             }}
-            className="bg-violet-600 px-2 py-1 rounded text-[9px] text-white font-bold"
+            className="text-xs bg-slate-700 px-2 py-1 rounded"
           >
-            📍 SET
+            SET
           </button>
-          
-          {/* Current coords display */}
-          <div className="text-[8px] text-slate-400 text-center leading-tight">
-            {location.lat.toFixed(4)}<br/>{location.lng.toFixed(4)}
+        </div>
+      </header>
+
+      {/* Plano de planta toggle */}
+      <div className="px-3 py-2 bg-slate-800 border-b border-slate-700 shrink-0">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-400">📐 Plano de planta</span>
+          <button 
+            onClick={() => setShowFloorPlanInput(!showFloorPlanInput)}
+            className="text-xs text-violet-400"
+          >
+            {showFloorPlanInput ? 'Ocultar' : 'Mostrar'}
+          </button>
+        </div>
+        {showFloorPlanInput && (
+          <div className="mt-2">
+            <input
+              type="text"
+              value={floorPlanUrl}
+              onChange={(e) => setFloorPlanUrl(e.target.value)}
+              placeholder="URL de la imagen del plano..."
+              className="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs mb-2"
+            />
+            <div className="flex gap-2">
+              <button 
+                onClick={saveFloorPlanUrl}
+                className="bg-violet-600 px-3 py-1 rounded text-xs"
+              >
+                Guardar URL
+              </button>
+              <button 
+                onClick={() => setFloorPlanUrl('')}
+                className="bg-slate-700 px-3 py-1 rounded text-xs"
+              >
+                Borrar
+              </button>
+            </div>
           </div>
-          
-          {/* Fine controls - 1m (compact D-pad) */}
-          <div className="grid grid-cols-3 gap-0.5">
-            <div></div>
-            <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">▲</button>
-            <div></div>
-            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">◄</button>
-            <div></div>
-            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">►</button>
-            <div></div>
-            <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-1 py-0.5 rounded text-[10px]">▼</button>
-            <div></div>
+        )}
+      </div>
+
+      {/* Map */}
+      <div className="flex-1 relative">
+        <MapComponent 
+          center={location} 
+          umbrales={recentUmbrales}
+          floorPlanUrl={floorPlanUrl}
+        />
+        
+        {/* Precision controls */}
+        <div className="absolute bottom-2 right-2 z-[1000] bg-slate-900/90 p-2 rounded-lg flex flex-col gap-1 w-20">
+          <button onClick={() => adjustLocation(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▲</button>
+          <div className="flex gap-1">
+            <button onClick={() => adjustLocation(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs flex-1">◄</button>
+            <button onClick={() => adjustLocation(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs flex-1">►</button>
           </div>
+          <button onClick={() => adjustLocation(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▼</button>
+          <p className="text-[10px] text-slate-500 text-center">+1m</p>
         </div>
       </div>
 
@@ -349,35 +320,31 @@ export default function WalkerPage() {
         </p>
       </div>
 
-      {/* Selector de Ciclo */}
+      {/* Ciclo selector */}
       <div className="px-3 py-2 bg-slate-800 border-y border-slate-700 shrink-0">
         <p className="text-xs text-slate-500 mb-2">Selecciona el puzzle/ciclo</p>
         <div className="flex gap-2">
-          {[
-            { id: 1, label: '1', color: 'violet' },
-            { id: 2, label: '2', color: 'blue' },
-            { id: 3, label: '3', color: 'green' },
-            { id: 4, label: '4', color: 'orange' },
-            { id: 5, label: '5', color: 'red' }
-          ].map(c => (
+          {[1, 2, 3, 4, 5].map(c => (
             <button
-              key={c.id}
-              onClick={() => setSelectedCiclo(c.id)}
+              key={c}
+              onClick={() => setSelectedCiclo(c)}
               className={`flex-1 py-2 rounded text-xs font-bold ${
-                selectedCiclo === c.id 
-                  ? c.color === 'violet' ? 'bg-violet-600' 
-                  : c.color === 'blue' ? 'bg-blue-600'
-                  : c.color === 'green' ? 'bg-green-600'
-                  : c.color === 'orange' ? 'bg-orange-600'
+                selectedCiclo === c 
+                  ? c === 1 ? 'bg-violet-600' 
+                  : c === 2 ? 'bg-blue-600'
+                  : c === 3 ? 'bg-green-600'
+                  : c === 4 ? 'bg-orange-600'
                   : 'bg-red-600'
                   : 'bg-slate-700'
               }`}
             >
-              🌀 {c.label}
+              🌀 {c}
             </button>
           ))}
         </div>
       </div>
+
+      {/* DROP Button */}
       <div className="p-3 shrink-0">
         <button 
           onClick={handleDropUmbral}
@@ -390,13 +357,13 @@ export default function WalkerPage() {
         </button>
       </div>
 
-      {/* Recent Umbrales */}
+      {/* Node list */}
       <div className="px-4 pb-3 overflow-y-auto max-h-[20vh] shrink-0">
-        <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Últimos nodos</p>
+        <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Ultimos nodos</p>
         {loading ? (
           <p className="text-slate-600">Cargando...</p>
         ) : recentUmbrales.length === 0 ? (
-          <p className="text-slate-600 text-sm">No hay umbrales. ¡Creá el primero!</p>
+          <p className="text-slate-600 text-sm">No hay umbrales. Crea el primero!</p>
         ) : (
           <div className="space-y-1">
             {recentUmbrales.map((u, i) => {
@@ -423,13 +390,12 @@ export default function WalkerPage() {
                   <span className="text-[10px] text-slate-600 font-mono">{u.id.substring(0,8)}</span>
                   <span className="text-xs text-slate-500">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                   <Link
-                    href={`/composer/${u.id}`}
+                    href={"/composer/" + u.id}
                     className="text-xs bg-slate-700 px-2 py-1 rounded ml-auto"
                   >
                     ✏️
                   </Link>
                 </button>
-              )}
               );
             })}
           </div>
