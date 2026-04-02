@@ -377,14 +377,21 @@ export default function WalkerPage() {
                   key={u.id}
                   type="button"
                   onClick={() => {
+                    console.log("CLICK: selectedNodeId=", u.id, "isSelected=", selectedNodeId === u.id);
                     setSelectedNodeId(u.id);
                     setLocation({ lat: u.position.lat, lng: u.position.lng });
                   }}
-                  className={`w-full flex items-center gap-2 p-3 rounded-xl text-left transition-all ${
-                    isSelected 
-                      ? 'bg-gradient-to-r from-violet-600/40 to-purple-600/40 border-2 border-violet-400 shadow-lg shadow-violet-500/30 scale-[1.02]' 
-                      : 'bg-slate-900 hover:bg-slate-800 border border-transparent'
-                  }`}
+                  style={{
+                    backgroundColor: isSelected ? '#7c3aed' : '#0f172a',
+                    border: isSelected ? '3px solid #a855f7' : '1px solid #334155',
+                    padding: '12px',
+                    borderRadius: '12px',
+                    marginBottom: '4px',
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
                 >
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
                   <span className="text-xs text-slate-300 font-bold">Umbral {nodeNumber}</span>
