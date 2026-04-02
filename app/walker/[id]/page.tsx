@@ -172,7 +172,8 @@ export default function WalkerPage() {
                 <button key={u.id} type="button" onClick={() => { setSelectedNodeId(u.id); setLocation(u.position); }} className="w-full flex items-center gap-2 p-2 rounded-lg text-left bg-slate-900 hover:bg-slate-800">
                   <div className={`w-3 h-3 rounded-full ${colorClass}`}></div>
                   <span className="text-xs text-slate-300">Umbral {u.nodeNumber}</span>
-                  <span className="text-xs text-slate-500">C{u.ciclo}</span>
+                  <span className="text-xs text-slate-500">🌀{u.ciclo}</span>
+                  <span className="text-[10px] text-slate-600">{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</span>
                   <Link href={'/composer/' + u.id} className="text-xs bg-slate-700 px-2 py-1 rounded ml-auto">Editar</Link>
                 </button>
               );

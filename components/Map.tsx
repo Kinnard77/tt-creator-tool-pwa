@@ -168,7 +168,9 @@ export default function MapComponent({ center, umbrales = [], floorPlanUrl = '',
               <Popup>
                 <div style={{ textAlign: 'center', padding: '2px', minWidth: '80px' }}>
                   <strong style={{ fontSize: '13px' }}>Umbral {nodeNumber}</strong>
-                  <div style={{ fontSize: '10px', color: '#666' }}>Ciclo {ciclo} | Pacing {u.pacing_value}</div>
+                  <div style={{ fontSize: '10px', color: '#666' }}>🌀 Ciclo {ciclo}</div>
+                  <div style={{ fontSize: '10px', color: '#888' }}>{u.position.lat.toFixed(5)}, {u.position.lng.toFixed(5)}</div>
+                  <div style={{ fontSize: '10px', marginBottom: '4px' }}>Pacing {u.pacing_value}</div>
                   <a 
                     href={'/composer/' + u.id}
                     style={{ 
