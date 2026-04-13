@@ -164,28 +164,23 @@ export default function AtlasPage() {
             {/* Coordenadas manuales */}
             <div className="flex gap-2 mt-3">
               <input
-                type="text"
-                inputMode="decimal"
-                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : String(coords.lat).replace('.', ',')}
+                type="number"
+                step="any"
+                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : coords.lat}
                 onChange={(e) => {
-                  // Aceptar punto o coma
-                  const val = e.target.value;
-                  const num = val.replace(',', '.');
-                  setCoords({ ...coords, lat: num === '' ? 0 : parseFloat(num) });
+                  setCoords({ ...coords, lat: e.target.value === '' ? 0 : parseFloat(e.target.value) });
                 }}
-                placeholder="Latitud (ej: 43.46)"
+                placeholder="Latitud (ej: 43,46)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
               <input
-                type="text"
-                inputMode="decimal"
-                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : String(coords.lng).replace('.', ',')}
+                type="number"
+                step="any"
+                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : coords.lng}
                 onChange={(e) => {
-                  const val = e.target.value;
-                  const num = val.replace(',', '.');
-                  setCoords({ ...coords, lng: num === '' ? 0 : parseFloat(num) });
+                  setCoords({ ...coords, lng: e.target.value === '' ? 0 : parseFloat(e.target.value) });
                 }}
-                placeholder="Longitud (ej: -3.80)"
+                placeholder="Longitud (ej: -3,80)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
             </div>
