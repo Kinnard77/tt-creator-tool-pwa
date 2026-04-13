@@ -166,20 +166,24 @@ export default function AtlasPage() {
             {/* Coordenadas manuales */}
             <div className="flex gap-2 mt-3">
               <input
-                type="number"
-                step="0.000001"
+                type="text"
                 value={coords.lat}
-                onChange={(e) => setCoords({ ...coords, lat: parseFloat(e.target.value) || 0 })}
-                placeholder="Latitud"
-                className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm"
+                onChange={(e) => {
+                  const val = e.target.value.replace(',', '.');
+                  setCoords({ ...coords, lat: parseFloat(val) || 0 });
+                }}
+                placeholder="Latitud (ej: 43.4623)"
+                className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
               <input
-                type="number"
-                step="0.000001"
+                type="text"
                 value={coords.lng}
-                onChange={(e) => setCoords({ ...coords, lng: parseFloat(e.target.value) || 0 })}
-                placeholder="Longitud"
-                className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm"
+                onChange={(e) => {
+                  const val = e.target.value.replace(',', '.');
+                  setCoords({ ...coords, lng: parseFloat(val) || 0 });
+                }}
+                placeholder="Longitud (ej: -3.8098)"
+                className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
             </div>
           </div>
@@ -194,27 +198,26 @@ export default function AtlasPage() {
         </div>
       )}
 
-      {!editing && (
-        <div className="p-4 space-y-4">
-          <Link 
-            href={`/walker/${id}`}
-            className="block bg-slate-900 border border-slate-800 p-6 rounded-xl hover:border-violet-500/50 transition-all"
-          >
-            <div className="text-4xl mb-3">🚶</div>
-            <h2 className="text-lg font-bold">The Walker</h2>
-            <p className="text-slate-500 text-sm mt-1">Caminar y Dropumbrales en tiempo real</p>
-          </Link>
+      {/* siempre visible: botones de Walker y Sequencer */}
+      <div className="p-4 space-y-4">
+        <Link 
+          href={`/walker/${id}`}
+          className="block bg-slate-900 border border-slate-800 p-6 rounded-xl hover:border-violet-500/50 transition-all"
+        >
+          <div className="text-4xl mb-3">🚶</div>
+          <h2 className="text-lg font-bold">The Walker</h2>
+          <p className="text-slate-500 text-sm mt-1">Caminar y Dropumbrales en tiempo real</p>
+        </Link>
 
-          <Link 
-            href={`/sequencer/${id}`}
-            className="block bg-slate-900 border border-slate-800 p-6 rounded-xl hover:border-violet-500/50 transition-all"
-          >
-            <div className="text-4xl mb-3">🔗</div>
-            <h2 className="text-lg font-bold">The Sequencer</h2>
-            <p className="text-slate-500 text-sm mt-1">Vista de grafo y conexiones</p>
-          </Link>
-        </div>
-      )}
+        <Link 
+          href={`/sequencer/${id}`}
+          className="block bg-slate-900 border border-slate-800 p-6 rounded-xl hover:border-violet-500/50 transition-all"
+        >
+          <div className="text-4xl mb-3">🔗</div>
+          <h2 className="text-lg font-bold">The Sequencer</h2>
+          <p className="text-slate-500 text-sm mt-1">Vista de grafo y conexiones</p>
+        </Link>
+      </div>
     </div>
   );
 }
