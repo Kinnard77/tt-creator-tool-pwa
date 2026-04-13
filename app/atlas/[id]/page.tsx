@@ -4,6 +4,12 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('@/components/Map'), { 
+  ssr: false,
+  loading: () => <div className="h-48 bg-slate-800 flex items-center justify-center"><p className="text-slate-500">Cargando mapa...</p></div>
+});
 
 export default function AtlasPage() {
   const params = useParams();
@@ -146,43 +152,35 @@ export default function AtlasPage() {
               </button>
             </div>
 
-            <div className="text-center mb-3">
-              <p className="font-mono text-sm">{coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}</p>
+            {/* Mapa */}
+            <div className="h-48 rounded-lg overflow-hidden mb-3">
+              <MapComponent 
+                center={coords.lat !== 0 || coords.lng !== 0 ? coords : { lat: 40.0, lng: -3.0 }} 
+                umbrales={[]} 
+                height="100%"
+              />
             </div>
-
-            {/* Controles de precisión */}
-            <div className="grid grid-cols-3 gap-1 w-24 mx-auto mb-2">
-              <div></div>
-              <button onClick={() => updateCoords(0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▲</button>
-              <div></div>
-              <button onClick={() => updateCoords(0, -0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">◄</button>
-              <button onClick={() => updateCoords(0, 0.00001)} className="bg-slate-700 px-2 py-1 rounded text-xs">►</button>
-              <div></div>
-              <button onClick={() => updateCoords(-0.00001, 0)} className="bg-slate-700 px-2 py-1 rounded text-xs">▼</button>
-              <div></div>
-            </div>
-            <p className="text-[10px] text-slate-500 text-center">+1m</p>
 
             {/* Coordenadas manuales */}
             <div className="flex gap-2 mt-3">
               <input
                 type="text"
-                value={coords.lat}
+                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : (coords.lat || '')}
                 onChange={(e) => {
                   const val = e.target.value.replace(',', '.');
-                  setCoords({ ...coords, lat: parseFloat(val) || 0 });
+                  setCoords({ ...coords, lat: val === '' ? 0 : parseFloat(val) || 0 });
                 }}
-                placeholder="Latitud (ej: 43.4623)"
+                placeholder="Latitud (ej: 43.46)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
               <input
                 type="text"
-                value={coords.lng}
+                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : (coords.lng || '')}
                 onChange={(e) => {
                   const val = e.target.value.replace(',', '.');
-                  setCoords({ ...coords, lng: parseFloat(val) || 0 });
+                  setCoords({ ...coords, lng: val === '' ? 0 : parseFloat(val) || 0 });
                 }}
-                placeholder="Longitud (ej: -3.8098)"
+                placeholder="Longitud (ej: -3.80)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
             </div>
