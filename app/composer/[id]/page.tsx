@@ -55,6 +55,10 @@ export default function ComposerPage() {
 
   const [loading, setLoading] = useState(true);
 
+  // Foto
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+
   // Load existing umbral data
   useEffect(() => {
     async function fetchUmbral() {
@@ -68,6 +72,10 @@ export default function ComposerPage() {
         setTriggerRadius(data.trigger_config?.radius || 5);
         setPosition(data.position || { lat: 0, lng: 0 });
         setCathedralId(data.cathedral_id);
+        // Load photoUrl from experience_config
+        if (data.experience_config?.photoUrl) {
+          setPhotoUrl(data.experience_config.photoUrl);
+        }
         // Load ciclo
         setCiclo(data.experience_config?.ciclo || 1);
         if (data.experience_config) {
@@ -104,6 +112,7 @@ export default function ComposerPage() {
   const handleSave = async () => {
     const experience_config = {
       ciclo, // Guardar el ciclo
+      photoUrl, // Guardar la URL de la foto
       umbra: {
         type: umbraType,
         content: umbraContent,
@@ -163,6 +172,45 @@ export default function ComposerPage() {
     }));
   };
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${umbralId}-${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from('umbrales-fotos')
+      .upload(fileName, file);
+
+    if (error) {
+      alert('Error subiendo foto: ' + error.message);
+    } else {
+      const { data: { publicUrl } } = supabase.storage
+        .from('umbrales-fotos')
+        .getPublicUrl(fileName);
+      
+      setPhotoUrl(publicUrl);
+      alert('✓ Foto subida');
+    }
+    
+    setUploading(false);
+  };
+
+  const handleDeletePhoto = async () => {
+    if (!photoUrl) return;
+    if (!confirm('¿Eliminar esta foto?')) return;
+    
+    // Extraer nombre del archivo de la URL
+    const fileName = photoUrl.split('/').pop();
+    if (fileName) {
+      await supabase.storage.from('umbrales-fotos').remove([fileName]);
+    }
+    setPhotoUrl('');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white p-8 flex items-center justify-center">
@@ -194,9 +242,37 @@ export default function ComposerPage() {
         {/* 📷 Foto */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <p className="text-xs text-slate-500 mb-2">📷 Foto de referencia</p>
-          <div className="h-24 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 text-sm">
-            Tocar para agregar
-          </div>
+          
+          {photoUrl ? (
+            <div className="relative">
+              <img 
+                src={photoUrl} 
+                alt="Foto del nodo" 
+                className="w-full h-48 object-cover rounded-lg"
+              />
+              <button
+                onClick={handleDeletePhoto}
+                className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs"
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
+          ) : (
+            <label className="h-24 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 text-sm cursor-pointer hover:bg-slate-700 transition-colors block">
+              <span>📷 Tocar para agregar foto</span>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handlePhotoUpload} 
+                disabled={uploading}
+                className="hidden" 
+              />
+            </label>
+          )}
+          
+          {uploading && (
+            <p className="text-xs text-violet-400 mt-2">Subiendo...</p>
+          )}
         </div>
 
         {/* 📦 Data Collection Box */}
