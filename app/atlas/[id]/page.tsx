@@ -165,20 +165,25 @@ export default function AtlasPage() {
             <div className="flex gap-2 mt-3">
               <input
                 type="text"
-                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : (coords.lat || '')}
+                inputMode="decimal"
+                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : String(coords.lat).replace('.', ',')}
                 onChange={(e) => {
-                  const val = e.target.value.replace(',', '.');
-                  setCoords({ ...coords, lat: val === '' ? 0 : parseFloat(val) || 0 });
+                  // Aceptar punto o coma
+                  const val = e.target.value;
+                  const num = val.replace(',', '.');
+                  setCoords({ ...coords, lat: num === '' ? 0 : parseFloat(num) });
                 }}
                 placeholder="Latitud (ej: 43.46)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
               <input
                 type="text"
-                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : (coords.lng || '')}
+                inputMode="decimal"
+                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : String(coords.lng).replace('.', ',')}
                 onChange={(e) => {
-                  const val = e.target.value.replace(',', '.');
-                  setCoords({ ...coords, lng: val === '' ? 0 : parseFloat(val) || 0 });
+                  const val = e.target.value;
+                  const num = val.replace(',', '.');
+                  setCoords({ ...coords, lng: num === '' ? 0 : parseFloat(num) });
                 }}
                 placeholder="Longitud (ej: -3.80)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
