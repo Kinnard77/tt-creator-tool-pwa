@@ -73,7 +73,7 @@ export default function AtlasPage() {
               return (
                 <Link 
                   key={cathedral.id} 
-                  href={`/walker/${cathedral.id}`}
+                  href={`/atlas/${cathedral.id}`}
                   className="group block bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 p-5 rounded-2xl hover:border-violet-500/50 hover:from-slate-800 hover:to-slate-800/90 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10"
                 >
                   <div className="flex items-start justify-between">
