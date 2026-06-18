@@ -1,0 +1,16 @@
+{
+  "slug": "umbra",
+  "repoFolder": "tt-creator-tool-pwa",
+  "owner": "Jorge Bonilla/IF&IF Studio 2026",
+  "type": "game_app",
+  "status": "Planning",
+  "theme": "violet",
+  "tech": "TBD",
+  "createdFromChat": true,
+  "discoveryPolicy": {
+    "detectFiles": ["project.md", "tasks.md", "hub.project.json"],
+    "requiresArchitectApproval": true
+  },
+  "links": [],
+  "notes": "Proyecto iniciático de Street Game basado en presencia física, MetaPuzzle universal, clímax lúdico y una Creator Tool autoral que valida cada experiencia en sitio."
+}
