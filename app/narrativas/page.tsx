@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
-// Sugerencias basadas en Fulcanelli + cathedrals + experiencias creadas
+// Sugerencias basadas en Fulcanelli + labyrinthoi + experiencias creadas
 const SUGGESTIONS = [
-  // De las catedrales que ya existen
+  // De las sedes que ya existen
   { title: 'El Misterio de Notre Dame', synopsis: 'Los secretos ocultos en la catedral parisina', ubicacion: 'Notre Dame, París', epoca: '1163-1345' },
   { title: 'La Catedral de Valencia', synopsis: 'El gótico mediterráneo y sus misterios', ubicacion: 'Catedral de Valencia', epoca: '1262-1482' },
   { title: 'La Catedral de Sevilla', synopsis: 'La mayor catedral gótica del mundo', ubicacion: 'Catedral de Sevilla', epoca: '1401-1506' },
@@ -15,7 +15,7 @@ const SUGGESTIONS = [
   // Temas de Fulcanelli
   { title: 'El Lenguaje de las Piedras', synopsis: 'Los mensajes ocultos en la arquitectura sagrada', ubicacion: 'Catedral genérica', epoca: 'Varía' },
   { title: 'Los Rosetones: Ojos del Cielo', synopsis: 'El simbolismo de las ventanas circulares', ubicacion: 'Catedral genérica', epoca: 'Varía' },
-  { title: 'La Alquimia en las Catedrales', synopsis: 'Los elementos alquímicos en la arquitectura', ubicacion: 'Catedral genérica', epoca: 'Varía' },
+  { title: 'La Alquimia en las catedrales', synopsis: 'Los elementos alquímicos en la arquitectura', ubicacion: 'Catedral genérica', epoca: 'Varía' },
   { title: 'El Taller de los Arquitectos', synopsis: 'Los constructores medievales y sus secretos', ubicacion: 'Catedral genérica', epoca: '1100-1400' },
   
   // Experiencias que creamos
@@ -115,7 +115,7 @@ export default function NarrativasPage() {
                 defaultValue=""
               >
                 <option value="" disabled>Seleccioná una sugerencia...</option>
-                <optgroup label="Catedrales">
+                <optgroup label="Labyrinthoi">
                   {SUGGESTIONS.slice(0, 4).map((s, i) => (
                     <option key={i} value={i}>{s.title}</option>
                   ))}

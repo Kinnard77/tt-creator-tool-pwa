@@ -27,7 +27,7 @@ const DEFAULT_LNG = -100.9326;
 export default function WalkerPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const cathedralId = params.id as string;
+  const labyrinthosId = params.id as string;
   
   const [location, setLocation] = useState({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
   const [isLocationLocked, setIsLocationLocked] = useState(false);
@@ -42,10 +42,10 @@ export default function WalkerPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data: cath } = await supabase.from('cathedrals').select('*').eq('id', cathedralId).single();
+      const { data: cath } = await supabase.from('labyrinthos').select('*').eq('id', labyrinthosId).single();
       
       if (cath) {
-        // Si la catedral no tiene ubicacion real (0,0 es un punto del
+        // Si el Labyrinthos no tiene ubicacion real (0,0 es un punto del
         // Atlantico, no una ubicacion valida) caemos al punto por defecto
         // en vez de mandar el mapa a mitad del oceano.
         if (cath.coords && !esNulaIsla(cath.coords.lat, cath.coords.lng)) {
@@ -58,7 +58,7 @@ export default function WalkerPage() {
         if (cath.floor_plan_url) setFloorPlanUrl(cath.floor_plan_url);
       }
 
-      const { data } = await supabase.from('umbrales').select('*').eq('cathedral_id', cathedralId).order('created_at', { ascending: false }).limit(10);
+      const { data } = await supabase.from('umbrales').select('*').eq('labyrinthos_id', labyrinthosId).order('created_at', { ascending: false }).limit(10);
       
       if (data) {
         const sorted = [...data].sort((a, b) => (a.node_number || 0) - (b.node_number || 0));
@@ -67,14 +67,15 @@ export default function WalkerPage() {
           position: u.position,
           type: u.type as 'umbra' | 'sigilum',
           pacing_value: u.pacing_value,
-          ciclo: u.experience_config?.ciclo || 1,
+          // La columna manda; el JSON queda como respaldo para lo antiguo.
+          ciclo: u.ciclo ?? u.experience_config?.ciclo ?? 1,
           nodeNumber: u.node_number || 1
         })));
       }
       setLoading(false);
     }
     fetchData();
-  }, [cathedralId]);
+  }, [labyrinthosId]);
 
   const requestGPS = () => {
     if (navigator.geolocation) {
@@ -90,13 +91,16 @@ export default function WalkerPage() {
     setSaving(true);
     if (navigator.vibrate) navigator.vibrate(100);
 
-    const { count } = await supabase.from('umbrales').select('*', { count: 'exact', head: true }).eq('cathedral_id', cathedralId);
+    const { count } = await supabase.from('umbrales').select('*', { count: 'exact', head: true }).eq('labyrinthos_id', labyrinthosId);
     const nextNodeNumber = (count || 0) + 1;
 
     const { data, error } = await supabase.from('umbrales').insert({
-      cathedral_id: cathedralId,
+      labyrinthos_id: labyrinthosId,
       position: { lat: location.lat, lng: location.lng },
       trigger_config: { type: 'geo_radius', radius: 5 },
+      ciclo: selectedCiclo,
+      // Se sigue escribiendo dentro del JSON por compatibilidad con los
+      // nodos creados antes de que el ciclo fuera columna propia.
       experience_config: { type: 'text', content: '', ciclo: selectedCiclo },
       pacing_value: 5,
       type: 'umbra',
@@ -125,7 +129,7 @@ export default function WalkerPage() {
   const toggleLock = () => {
     if (!isLocationLocked) {
       setIsLocationLocked(true);
-      supabase.from('cathedrals').update({ coords: location }).eq('id', cathedralId);
+      supabase.from('labyrinthos').update({ coords: location }).eq('id', labyrinthosId);
     } else {
       setIsLocationLocked(false);
     }
@@ -134,7 +138,7 @@ export default function WalkerPage() {
   return (
     <div className="h-screen flex flex-col bg-black text-white">
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between">
-        <Link href={'/atlas/' + cathedralId} className="text-violet-400 text-sm">← Volver</Link>
+        <Link href={'/atlas/' + labyrinthosId} className="text-violet-400 text-sm">← Volver</Link>
         <h1 className="text-violet-400 font-bold text-sm">The Walker</h1>
         <div className="flex gap-2">
           <button onClick={requestGPS} className="text-xs bg-blue-700 px-2 py-1 rounded">GPS</button>
@@ -146,9 +150,9 @@ export default function WalkerPage() {
 
       {sinUbicacion && (
         <div className="px-4 py-2 bg-amber-900/40 border-b border-amber-700 text-amber-200 text-xs">
-          Esta catedral no tiene ubicación guardada. El mapa muestra un punto
+          Este Labyrinthos no tiene ubicación guardada. El mapa muestra un punto
           por defecto.{' '}
-          <Link href={`/atlas/${cathedralId}`} className="underline font-bold">
+          <Link href={`/atlas/${labyrinthosId}`} className="underline font-bold">
             Ponle sus coordenadas
           </Link>
         </div>

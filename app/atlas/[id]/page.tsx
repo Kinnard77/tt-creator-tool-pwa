@@ -15,7 +15,7 @@ const MapComponent = dynamic(() => import('@/components/Map'), {
 export default function AtlasPage() {
   const params = useParams();
   const id = params.id as string;
-  const [cathedral, setCathedral] = useState<any>(null);
+  const [labyrinthos, setLabyrinthos] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [coords, setCoords] = useState({ lat: 0, lng: 0 });
   const [saving, setSaving] = useState(false);
@@ -28,14 +28,14 @@ export default function AtlasPage() {
   const [errorCoords, setErrorCoords] = useState('');
 
   useEffect(() => {
-    async function fetchCathedral() {
+    async function fetchLabyrinthos() {
       const { data } = await supabase
-        .from('cathedrals')
+        .from('labyrinthos')
         .select('*')
         .eq('id', id)
         .single();
       if (data) {
-        setCathedral(data);
+        setLabyrinthos(data);
         const c = data.coords || { lat: 0, lng: 0 };
         setCoords(c);
         setName(data.name || '');
@@ -48,14 +48,14 @@ export default function AtlasPage() {
         setLngTexto(nula ? '' : String(c.lng));
       }
     }
-    fetchCathedral();
+    fetchLabyrinthos();
   }, [id]);
 
   const handleSave = async () => {
     setErrorCoords('');
 
     // Validamos antes de tocar la base de datos: mas vale avisar que guardar
-    // una catedral en medio del Atlantico.
+    // un Labyrinthos en medio del Atlantico.
     const rLat = leerLatitud(latTexto);
     const rLng = leerLongitud(lngTexto);
 
@@ -81,7 +81,7 @@ export default function AtlasPage() {
 
     setSaving(true);
     const { error } = await supabase
-      .from('cathedrals')
+      .from('labyrinthos')
       .update({
         name,
         city,
@@ -94,8 +94,8 @@ export default function AtlasPage() {
       alert('Error: ' + explicarError(error));
     } else {
       setCoords(nuevas);
-      setCathedral({ ...cathedral, name, city, country, coords: nuevas });
-      alert('✓ Catedral actualizada');
+      setLabyrinthos({ ...labyrinthos, name, city, country, coords: nuevas });
+      alert('✓ Labyrinthos actualizado');
       setEditing(false);
     }
     setSaving(false);
@@ -131,7 +131,7 @@ export default function AtlasPage() {
     }));
   };
 
-  if (!cathedral) {
+  if (!labyrinthos) {
     return (
       <div className="min-h-screen bg-black text-white p-8">
         <Link href="/" className="text-violet-400">← Volver</Link>
@@ -145,9 +145,9 @@ export default function AtlasPage() {
       <header className="bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between">
         <div>
           <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Atlas</Link>
-          <h1 className="text-xl font-bold mt-2">{cathedral.name}</h1>
-          <p className="text-slate-500 text-sm">{cathedral.city}, {cathedral.country}</p>
-          <p className="text-violet-400 text-xs mt-1">🟢 {cathedral.umbral_count || 0} umbrales</p>
+          <h1 className="text-xl font-bold mt-2">{labyrinthos.name}</h1>
+          <p className="text-slate-500 text-sm">{labyrinthos.city}, {labyrinthos.country}</p>
+          <p className="text-violet-400 text-xs mt-1">🟢 {labyrinthos.umbral_count || 0} umbrales</p>
         </div>
         <button
           onClick={() => setEditing(!editing)}
@@ -157,12 +157,12 @@ export default function AtlasPage() {
         </button>
       </header>
 
-      {/* Edición de catedral */}
+      {/* Edición de Labyrinthos */}
       {editing && (
         <div className="p-4 space-y-4">
           {/* Datos básicos */}
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
-            <p className="text-xs text-slate-500 mb-2 uppercase">Datos de la catedral</p>
+            <p className="text-xs text-slate-500 mb-2 uppercase">Datos del Labyrinthos</p>
             <input
               type="text"
               value={name}
@@ -210,7 +210,7 @@ export default function AtlasPage() {
             {/* Coordenadas manuales.
                 Son campos de texto a proposito: <input type="number"> rechaza
                 la coma decimal y devuelve cadena vacia, que antes se guardaba
-                como 0 y mandaba la catedral al Atlantico. */}
+                como 0 y mandaba el Labyrinthos al Atlantico. */}
             <div className="flex gap-2 mt-3">
               <input
                 type="text"

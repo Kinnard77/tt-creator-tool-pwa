@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { supabase } from '@/lib/supabase';
+import { supabase, explicarError } from '@/lib/supabase';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
@@ -50,7 +49,7 @@ export default function ComposerPage() {
 
   // Position for editing
   const [position, setPosition] = useState({ lat: 0, lng: 0 });
-  const [cathedralId, setCathedralId] = useState<string | null>(null);
+  const [labyrinthosId, setLabyrinthosId] = useState<string | null>(null);
   const [ciclo, setCiclo] = useState(1);
 
   const [loading, setLoading] = useState(true);
@@ -71,13 +70,13 @@ export default function ComposerPage() {
       if (data) {
         setTriggerRadius(data.trigger_config?.radius || 5);
         setPosition(data.position || { lat: 0, lng: 0 });
-        setCathedralId(data.cathedral_id);
+        setLabyrinthosId(data.labyrinthos_id);
         // Load photoUrl from experience_config
         if (data.experience_config?.photoUrl) {
           setPhotoUrl(data.experience_config.photoUrl);
         }
         // Load ciclo
-        setCiclo(data.experience_config?.ciclo || 1);
+        setCiclo(data.ciclo ?? data.experience_config?.ciclo ?? 1);
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -136,13 +135,14 @@ export default function ComposerPage() {
       .from('umbrales')
       .update({
         position,
+        ciclo,
         trigger_config: { type: 'geo_radius', radius: triggerRadius, orientation: requiresOrientation },
         experience_config
       })
       .eq('id', umbralId);
 
     if (error) {
-      alert('Error: ' + error.message);
+      alert('Error: ' + explicarError(error));
     } else {
       alert('✓ UMBRAL ACTUALIZADO');
     }
@@ -223,8 +223,8 @@ export default function ComposerPage() {
     <div className="min-h-screen bg-black text-white pb-8">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-800 p-3 flex items-center justify-between sticky top-0 z-20">
-        {cathedralId ? (
-          <Link href={`/walker/${cathedralId}`} className="text-violet-400 hover:underline text-sm">← Volver</Link>
+        {labyrinthosId ? (
+          <Link href={`/walker/${labyrinthosId}`} className="text-violet-400 hover:underline text-sm">← Volver</Link>
         ) : (
           <Link href="/atlas" className="text-violet-400 hover:underline text-sm">← Volver</Link>
         )}

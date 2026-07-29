@@ -12,20 +12,20 @@ const statusColors: Record<string, { bg: string; border: string; text: string }>
 };
 
 export default function AtlasPage() {
-  const [cathedrals, setCathedrals] = useState<any[]>([]);
+  const [labyrinthoi, setLabyrinthoi] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchCathedrals() {
+    async function fetchLabyrinthoi() {
       const { data } = await supabase
-        .from('cathedrals')
+        .from('labyrinthos')
         .select('*')
         .order('created_at', { ascending: true });
       
-      if (data) setCathedrals(data);
+      if (data) setLabyrinthoi(data);
       setLoading(false);
     }
-    fetchCathedrals();
+    fetchLabyrinthoi();
   }, []);
 
   if (loading) {
@@ -52,58 +52,58 @@ export default function AtlasPage() {
         <div className="w-16"></div>
       </header>
 
-      {/* Atlas - Cathedral List */}
+      {/* Atlas - Labyrinthos List */}
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-violet-400 font-bold text-sm uppercase tracking-widest">The Atlas</h2>
           <span className="text-xs text-slate-500 bg-slate-800/50 px-3 py-1 rounded-full">
-            {cathedrals.length} sitios
+            {labyrinthoi.length} sitios
           </span>
         </div>
 
-        {cathedrals.length === 0 ? (
+        {labyrinthoi.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-500 text-lg mb-2">No hay catedrales</p>
-            <p className="text-slate-600 text-sm">Crea la primera para comenzar</p>
+            <p className="text-slate-500 text-lg mb-2">No hay Labyrinthoi</p>
+            <p className="text-slate-600 text-sm">Crea el primero para comenzar</p>
           </div>
         ) : (
           <div className="grid gap-4">
-            {cathedrals.map((cathedral) => {
-              const status = statusColors[cathedral.status] || statusColors.draft;
+            {labyrinthoi.map((labyrinthos) => {
+              const status = statusColors[labyrinthos.status] || statusColors.draft;
               
               return (
                 <Link 
-                  key={cathedral.id} 
-                  href={`/atlas/${cathedral.id}`}
+                  key={labyrinthos.id} 
+                  href={`/atlas/${labyrinthos.id}`}
                   className="group block bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-slate-700/50 p-5 rounded-2xl hover:border-violet-500/50 hover:from-slate-800 hover:to-slate-800/90 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-white group-hover:text-violet-300 transition-colors">
-                          {cathedral.name}
+                          {labyrinthos.name}
                         </h3>
                         <span className={`text-[10px] px-2.5 py-1 rounded-full border ${status.bg} ${status.border} ${status.text} uppercase tracking-wider`}>
-                          {cathedral.status}
+                          {labyrinthos.status}
                         </span>
                       </div>
-                      <p className="text-slate-400 text-sm">{cathedral.city}, {cathedral.country}</p>
+                      <p className="text-slate-400 text-sm">{labyrinthos.city}, {labyrinthos.country}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-2xl font-bold text-violet-400">{cathedral.umbral_count || 0}</span>
+                      <span className="text-2xl font-bold text-violet-400">{labyrinthos.umbral_count || 0}</span>
                       <p className="text-[10px] text-slate-500 uppercase tracking-wider">nodos</p>
                     </div>
                   </div>
                   
                   <div className="flex gap-3 mt-5 pt-4 border-t border-slate-700/50">
                     <Link 
-                      href={`/walker/${cathedral.id}`}
+                      href={`/walker/${labyrinthos.id}`}
                       className="flex-1 text-center py-2.5 bg-slate-700/30 rounded-xl text-sm text-slate-300 hover:bg-violet-600/20 hover:text-violet-300 transition-all"
                     >
                       🚶 Walker
                     </Link>
                     <Link 
-                      href={`/sequencer/${cathedral.id}`}
+                      href={`/sequencer/${labyrinthos.id}`}
                       className="flex-1 text-center py-2.5 bg-slate-700/30 rounded-xl text-sm text-slate-300 hover:bg-violet-600/20 hover:text-violet-300 transition-all"
                     >
                       🔗 Sequencer
@@ -118,15 +118,15 @@ export default function AtlasPage() {
         {/* New Site Button - Modern gradient */}
         <button 
           onClick={() => {
-            const name = prompt('Nombre de la catedral:');
+            const name = prompt('Nombre del Labyrinthos:');
             if (!name) return;
             const city = prompt('Ciudad:') || '';
             const country = prompt('Pais:') || '';
             
             // Se aceptan coma y punto decimal, y se valida el rango. Antes,
-            // una entrada invalida se convertia en 0 sin avisar y la catedral
+            // una entrada invalida se convertia en 0 sin avisar y el Labyrinthos
             // acababa en el Atlantico. Se puede dejar en blanco y ponerlas
-            // luego desde la pantalla de la catedral.
+            // luego desde la pantalla del Labyrinthos.
             let lat = 0, lng = 0;
             const latInput = prompt('Latitud (ej: 21.1583). Dejalo en blanco si aun no la sabes:');
             const lngInput = prompt('Longitud (ej: -100.9326):');
@@ -140,7 +140,7 @@ export default function AtlasPage() {
                   : `Longitud: ${(rLng as { motivo: string }).motivo}`;
                 alert(
                   motivo +
-                    '\n\nLa catedral se creara sin ubicacion. Podras ponerla ' +
+                    '\n\nEl Labyrinthos se creara sin ubicacion. Podras ponerlo ' +
                     'despues con el boton Editar.'
                 );
               } else {
@@ -150,7 +150,7 @@ export default function AtlasPage() {
             }
 
             async function create() {
-              const { data, error } = await supabase.from('cathedrals').insert({
+              const { data, error } = await supabase.from('labyrinthos').insert({
                 name,
                 city,
                 country,

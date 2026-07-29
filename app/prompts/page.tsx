@@ -8,13 +8,13 @@ const EXAMPLE_PROMPTS = {
   'La Campana': 'Ancient stone bell tower at dawn, Mexican colonial church, massive bronze bell in focus, dramatic chiaroscuro lighting, mysterious fog at ground level, 17th century architectural details, photorealistic, cinematic composition, dark mystical atmosphere',
   'Los Nombres': 'Elderly stone wall with engraved names, forgotten heroes, dramatic side lighting, worn carved letters, historical monument, Mexico 1810, sepia tones, melancholic atmosphere, photorealistic, detailed stone textures',
   'El Pasaje Secreto': 'Narrow stone corridor, hidden passage, mysterious shadows, flickering candlelight, 18th century architecture, secret doorway revealed, dramatic lighting, dark corridor with ancient bricks, mysterious atmosphere',
-  'La Cifra': 'Mathematical symbols carved in stone altar, golden ratio proportions, sacred geometry, mystical numbers, cathedral interior, divine light from stained glass, mathematical mysticism, photorealistic, intricate carvings',
+  'La Cifra': 'Mathematical symbols carved in stone altar, golden ratio proportions, sacred geometry, mystical numbers, labyrinthos interior, divine light from stained glass, mathematical mysticism, photorealistic, intricate carvings',
   'El Susurro': 'Dark confession booth, mysterious shadowy figure whispering, dramatic backlight, Catholic church interior 1810, gothic architecture, suspenseful atmosphere, hidden secrets, photorealistic, cinematic',
   'La Salida': 'Ancient church exit, doorway to freedom, morning light breaking through, hope and liberation, Mexican independence theme, architectural detail, photorealistic, symbolic composition, historical drama',
-  'Notre Dame': 'Medieval cathedral interior, massive ribbed vaults, stained glass windows with light rays, flying buttresses, Gothic architecture, mysterious atmosphere, dramatic vertical lines, photorealistic, cinematic',
+  'Notre Dame': 'Medieval labyrinthos interior, massive ribbed vaults, stained glass windows with light rays, flying buttresses, Gothic architecture, mysterious atmosphere, dramatic vertical lines, photorealistic, cinematic',
   'Dolores Hidalgo': 'Mexican colonial church facade, bell tower, Mexican independence era 1810, historic building, dramatic sky, architectural details, photorealistic, historical monument',
   'Aenigma': 'Mysterious hooded figure, alchemist style, glowing eyes, dark robes with arcane symbols, mystical aura, photorealistic, cinematic lighting, fantasy portrait, dark background',
-  'Generico': 'Gothic cathedral interior, mysterious atmosphere, dramatic lighting, photorealistic, cinematic, detailed architectural elements, moody, dark fantasy style',
+  'Generico': 'Gothic labyrinthos interior, mysterious atmosphere, dramatic lighting, photorealistic, cinematic, detailed architectural elements, moody, dark fantasy style',
 };
 
 export default function PromptsPage() {
@@ -29,7 +29,7 @@ export default function PromptsPage() {
     async function fetch() {
       const [narr, umbr] = await Promise.all([
         supabase.from('narrativas').select('id, title'),
-        supabase.from('umbrales').select('id, cathedral_id')
+        supabase.from('umbrales').select('id, labyrinthos_id')
       ]);
       if (narr.data) setNarrativas(narr.data);
       if (umbr.data) setUmbrales(umbr.data);

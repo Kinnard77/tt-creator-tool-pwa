@@ -24,24 +24,24 @@ interface Umbral {
 
 export default function SequencerPage() {
   const params = useParams();
-  const cathedralId = params.id as string;
+  const labyrinthosId = params.id as string;
   
   const [allUmbrales, setAllUmbrales] = useState<Umbral[]>([]);
-  const [cathedral, setCathedral] = useState<any>(null);
+  const [labyrinthos, setLabyrinthos] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState({ lat: 21.1583, lng: -100.9326 });
 
   useEffect(() => {
     async function fetchData() {
-      // Fetch cathedral
+      // Fetch labyrinthos
       const { data: cath } = await supabase
-        .from('cathedrals')
+        .from('labyrinthos')
         .select('*')
-        .eq('id', cathedralId)
+        .eq('id', labyrinthosId)
         .single();
       
       if (cath) {
-        setCathedral(cath);
+        setLabyrinthos(cath);
         if (cath.coords) setMapCenter(cath.coords);
       }
 
@@ -49,7 +49,7 @@ export default function SequencerPage() {
       const { data: umbs } = await supabase
         .from('umbrales')
         .select('*')
-        .eq('cathedral_id', cathedralId)
+        .eq('labyrinthos_id', labyrinthosId)
         .order('created_at', { ascending: true });
 
       if (umbs) {
@@ -69,7 +69,7 @@ export default function SequencerPage() {
       setLoading(false);
     }
     fetchData();
-  }, [cathedralId]);
+  }, [labyrinthosId]);
 
   if (loading) {
     return (
@@ -147,7 +147,7 @@ export default function SequencerPage() {
               <p className="font-bold text-violet-400">🧪 PRUEBAS (Nodos físicos)</p>
               <p className="text-slate-400">{allUmbrales.length} nodos creados</p>
               <p className="text-slate-500 mt-1">
-                El jugador resuelve puzzles en ubicaciones reales de la catedral.
+                El jugador resuelve puzzles en ubicaciones reales del Labyrinthos.
                 Al completar todos → activa la Cámara Oscura.
               </p>
             </div>

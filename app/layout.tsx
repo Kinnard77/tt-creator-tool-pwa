@@ -5,7 +5,7 @@ import AuthGate from "@/components/AuthGate";
 
 export const metadata: Metadata = {
   title: "UMBRA Creator Tool",
-  description: "Walking is Writing - Create spatial experiences in cathedrals",
+  description: "Walking is Writing - Create spatial experiences in real places",
   manifest: "/manifest.json",
 };
 

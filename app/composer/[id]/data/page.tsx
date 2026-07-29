@@ -117,8 +117,8 @@ export default function DataCollectionPage() {
   const router = useRouter();
   const umbralId = params.id as string;
 
-  // Obtener cathedral_id del umbral
-  const [cathedralId, setCathedralId] = useState<string | null>(null);
+  // Obtener labyrinthos_id del umbral
+  const [labyrinthosId, setLabyrinthosId] = useState<string | null>(null);
   
   // Estado de la lista de entradas
   const [entries, setEntries] = useState<any[]>([]);
@@ -134,15 +134,15 @@ export default function DataCollectionPage() {
   // Cargar datos
   useEffect(() => {
     async function fetchData() {
-      // Primero obtener el umbral para saber el cathedral_id
+      // Primero obtener el umbral para saber el labyrinthos_id
       const { data: umbral } = await supabase
         .from('umbrales')
-        .select('cathedral_id')
+        .select('labyrinthos_id')
         .eq('id', umbralId)
         .single();
 
       if (umbral) {
-        setCathedralId(umbral.cathedral_id);
+        setLabyrinthosId(umbral.labyrinthos_id);
         
         // Cargar entradas existentes para este nodo
         const { data: entriesData } = await supabase
@@ -171,7 +171,7 @@ export default function DataCollectionPage() {
     const { error } = await supabase
       .from('data_collection_entries')
       .insert({
-        cathedral_id: cathedralId,
+        labyrinthos_id: labyrinthosId,
         umbral_id: umbralId,
         type: selectedType,
         title,
