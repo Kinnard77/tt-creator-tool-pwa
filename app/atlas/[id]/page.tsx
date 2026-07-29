@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase, explicarError } from '@/lib/supabase';
+import { leerLatitud, leerLongitud, esNulaIsla } from '@/lib/coords';
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
@@ -21,6 +22,10 @@ export default function AtlasPage() {
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
+  // El texto crudo de los campos, para no destruir lo que se esta escribiendo.
+  const [latTexto, setLatTexto] = useState('');
+  const [lngTexto, setLngTexto] = useState('');
+  const [errorCoords, setErrorCoords] = useState('');
 
   useEffect(() => {
     async function fetchCathedral() {
@@ -31,16 +36,49 @@ export default function AtlasPage() {
         .single();
       if (data) {
         setCathedral(data);
-        setCoords(data.coords || { lat: 0, lng: 0 });
+        const c = data.coords || { lat: 0, lng: 0 };
+        setCoords(c);
         setName(data.name || '');
         setCity(data.city || '');
         setCountry(data.country || '');
+        // Si estan en la Isla Nula (0,0) dejamos los campos vacios para que
+        // se vea que no hay ubicacion, en vez de mostrar un 0 enganoso.
+        const nula = esNulaIsla(c.lat, c.lng);
+        setLatTexto(nula ? '' : String(c.lat));
+        setLngTexto(nula ? '' : String(c.lng));
       }
     }
     fetchCathedral();
   }, [id]);
 
   const handleSave = async () => {
+    setErrorCoords('');
+
+    // Validamos antes de tocar la base de datos: mas vale avisar que guardar
+    // una catedral en medio del Atlantico.
+    const rLat = leerLatitud(latTexto);
+    const rLng = leerLongitud(lngTexto);
+
+    if (!rLat.ok || !rLng.ok) {
+      const ambosVacios =
+        !rLat.ok && rLat.vacio && !rLng.ok && rLng.vacio;
+      if (!ambosVacios) {
+        const fallo = !rLat.ok ? rLat : rLng;
+        setErrorCoords(
+          !rLat.ok && !rLat.vacio
+            ? `Latitud: ${rLat.motivo}`
+            : !rLng.ok && !rLng.vacio
+              ? `Longitud: ${rLng.motivo}`
+              : 'Faltan la latitud o la longitud. Rellena las dos, o deja las dos vacías.'
+        );
+        void fallo;
+        return;
+      }
+    }
+
+    const nuevas =
+      rLat.ok && rLng.ok ? { lat: rLat.valor, lng: rLng.valor } : { lat: 0, lng: 0 };
+
     setSaving(true);
     const { error } = await supabase
       .from('cathedrals')
@@ -48,13 +86,15 @@ export default function AtlasPage() {
         name,
         city,
         country,
-        coords
+        coords: nuevas
       })
       .eq('id', id);
 
     if (error) {
-      alert('Error: ' + error.message);
+      alert('Error: ' + explicarError(error));
     } else {
+      setCoords(nuevas);
+      setCathedral({ ...cathedral, name, city, country, coords: nuevas });
       alert('✓ Catedral actualizada');
       setEditing(false);
     }
@@ -65,10 +105,16 @@ export default function AtlasPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setCoords({
+          const c = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
+          };
+          setCoords(c);
+          // Los campos de texto son la fuente de verdad al guardar, asi que
+          // hay que mantenerlos sincronizados con lo que da el GPS.
+          setLatTexto(String(c.lat));
+          setLngTexto(String(c.lng));
+          setErrorCoords('');
         },
         () => alert('No se pudo obtener GPS'),
         { enableHighAccuracy: true, timeout: 10000 }
@@ -161,29 +207,35 @@ export default function AtlasPage() {
               />
             </div>
 
-            {/* Coordenadas manuales */}
+            {/* Coordenadas manuales.
+                Son campos de texto a proposito: <input type="number"> rechaza
+                la coma decimal y devuelve cadena vacia, que antes se guardaba
+                como 0 y mandaba la catedral al Atlantico. */}
             <div className="flex gap-2 mt-3">
               <input
-                type="number"
-                step="any"
-                value={coords.lat === 0 && cathedral?.coords?.lat === 0 ? '' : coords.lat}
-                onChange={(e) => {
-                  setCoords({ ...coords, lat: e.target.value === '' ? 0 : parseFloat(e.target.value) });
-                }}
-                placeholder="Latitud (ej: 43,46)"
+                type="text"
+                inputMode="decimal"
+                value={latTexto}
+                onChange={(e) => setLatTexto(e.target.value)}
+                placeholder="Latitud (ej: 21.1583)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
               <input
-                type="number"
-                step="any"
-                value={coords.lng === 0 && cathedral?.coords?.lng === 0 ? '' : coords.lng}
-                onChange={(e) => {
-                  setCoords({ ...coords, lng: e.target.value === '' ? 0 : parseFloat(e.target.value) });
-                }}
-                placeholder="Longitud (ej: -3,80)"
+                type="text"
+                inputMode="decimal"
+                value={lngTexto}
+                onChange={(e) => setLngTexto(e.target.value)}
+                placeholder="Longitud (ej: -100.9326)"
                 className="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm font-mono"
               />
             </div>
+            <p className="text-[11px] text-slate-500 mt-2">
+              Admite grados decimales (21.1583 o 21,1583) y también el formato
+              de Google Maps (20°54&apos;49.4&quot;N). Puedes pegarlo tal cual.
+            </p>
+            {errorCoords && (
+              <p className="text-amber-400 text-xs mt-2">{errorCoords}</p>
+            )}
           </div>
 
           <button

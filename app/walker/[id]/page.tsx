@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { supabase, explicarError } from '@/lib/supabase';
+import { esNulaIsla } from '@/lib/coords';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
@@ -30,6 +31,7 @@ export default function WalkerPage() {
   
   const [location, setLocation] = useState({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
   const [isLocationLocked, setIsLocationLocked] = useState(false);
+  const [sinUbicacion, setSinUbicacion] = useState(false);
   const [recentUmbrales, setRecentUmbrales] = useState<Umbral[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -43,11 +45,15 @@ export default function WalkerPage() {
       const { data: cath } = await supabase.from('cathedrals').select('*').eq('id', cathedralId).single();
       
       if (cath) {
-        if (cath.coords && (cath.coords.lat !== 0 || cath.coords.lng !== 0)) {
+        // Si la catedral no tiene ubicacion real (0,0 es un punto del
+        // Atlantico, no una ubicacion valida) caemos al punto por defecto
+        // en vez de mandar el mapa a mitad del oceano.
+        if (cath.coords && !esNulaIsla(cath.coords.lat, cath.coords.lng)) {
           setLocation(cath.coords);
           setIsLocationLocked(true);
-        } else if (cath.coords) {
-          setLocation(cath.coords);
+        } else {
+          setLocation({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
+          setSinUbicacion(true);
         }
         if (cath.floor_plan_url) setFloorPlanUrl(cath.floor_plan_url);
       }
@@ -98,11 +104,17 @@ export default function WalkerPage() {
       node_number: nextNodeNumber
     }).select().single();
 
-    if (!error && data) {
-      setRecentUmbrales(prev => [{ id: data.id, position: data.position, type: data.type, pacing_value: data.pacing_value, ciclo: selectedCiclo, nodeNumber: nextNodeNumber }, ...prev.slice(0, 9)]);
-    }
     setSaving(false);
-    alert('Nodo creado');
+
+    if (error || !data) {
+      // Antes se anunciaba "Nodo creado" pasara lo que pasara, asi que un
+      // fallo de guardado pasaba inadvertido hasta volver a casa.
+      alert('No se pudo crear el nodo:\n\n' + explicarError(error));
+      return;
+    }
+
+    setRecentUmbrales(prev => [{ id: data.id, position: data.position, type: data.type, pacing_value: data.pacing_value, ciclo: selectedCiclo, nodeNumber: nextNodeNumber }, ...prev.slice(0, 9)]);
+    alert('Nodo ' + nextNodeNumber + ' creado');
   };
 
   const adjustLocation = (dLat: number, dLng: number) => {
@@ -131,6 +143,16 @@ export default function WalkerPage() {
           </button>
         </div>
       </header>
+
+      {sinUbicacion && (
+        <div className="px-4 py-2 bg-amber-900/40 border-b border-amber-700 text-amber-200 text-xs">
+          Esta catedral no tiene ubicación guardada. El mapa muestra un punto
+          por defecto.{' '}
+          <Link href={`/atlas/${cathedralId}`} className="underline font-bold">
+            Ponle sus coordenadas
+          </Link>
+        </div>
+      )}
 
       <div className="flex-1 relative">
         <MapComponent center={location} umbrales={recentUmbrales} floorPlanUrl={floorPlanUrl} selectedId={selectedNodeId} />

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { leerLatitud, leerLongitud } from '@/lib/coords';
 
 const statusColors: Record<string, { bg: string; border: string; text: string }> = {
   draft: { bg: 'bg-slate-800', border: 'border-slate-700', text: 'text-slate-400' },
@@ -122,15 +123,32 @@ export default function AtlasPage() {
             const city = prompt('Ciudad:') || '';
             const country = prompt('Pais:') || '';
             
+            // Se aceptan coma y punto decimal, y se valida el rango. Antes,
+            // una entrada invalida se convertia en 0 sin avisar y la catedral
+            // acababa en el Atlantico. Se puede dejar en blanco y ponerlas
+            // luego desde la pantalla de la catedral.
             let lat = 0, lng = 0;
-            const latInput = prompt('Latitud (ej: 48.8530):');
-            const lngInput = prompt('Longitud (ej: 2.3499):');
-            
-            if (latInput && lngInput) {
-              lat = parseFloat(latInput) || 0;
-              lng = parseFloat(lngInput) || 0;
+            const latInput = prompt('Latitud (ej: 21.1583). Dejalo en blanco si aun no la sabes:');
+            const lngInput = prompt('Longitud (ej: -100.9326):');
+
+            if ((latInput && latInput.trim()) || (lngInput && lngInput.trim())) {
+              const rLat = leerLatitud(latInput || '');
+              const rLng = leerLongitud(lngInput || '');
+              if (!rLat.ok || !rLng.ok) {
+                const motivo = !rLat.ok
+                  ? `Latitud: ${rLat.motivo}`
+                  : `Longitud: ${(rLng as { motivo: string }).motivo}`;
+                alert(
+                  motivo +
+                    '\n\nLa catedral se creara sin ubicacion. Podras ponerla ' +
+                    'despues con el boton Editar.'
+                );
+              } else {
+                lat = rLat.valor;
+                lng = rLng.valor;
+              }
             }
-            
+
             async function create() {
               const { data, error } = await supabase.from('cathedrals').insert({
                 name,
