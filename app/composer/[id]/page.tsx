@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase, explicarError } from '@/lib/supabase';
+import { MAQUINAS, EMOCIONES, buscarMaquina, buscarEmocion } from '@/lib/maquinas';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
@@ -51,6 +52,13 @@ export default function ComposerPage() {
   const [position, setPosition] = useState({ lat: 0, lng: 0 });
   const [labyrinthosId, setLabyrinthosId] = useState<string | null>(null);
   const [ciclo, setCiclo] = useState(1);
+  // La fórmula operacional: lo que convierte una pregunta en una máquina.
+  const [maquina, setMaquina] = useState<string>('');
+  const [emocion, setEmocion] = useState<string>('');
+  const [accionExigida, setAccionExigida] = useState('');
+  const [restriccion, setRestriccion] = useState('');
+  const [feedback, setFeedback] = useState('');
+  const [casi, setCasi] = useState('');
 
   const [loading, setLoading] = useState(true);
 
@@ -77,6 +85,12 @@ export default function ComposerPage() {
         }
         // Load ciclo
         setCiclo(data.ciclo ?? data.experience_config?.ciclo ?? 1);
+        setMaquina(data.maquina || '');
+        setEmocion(data.emocion || '');
+        setAccionExigida(data.accion_exigida || '');
+        setRestriccion(data.restriccion || '');
+        setFeedback(data.feedback || '');
+        setCasi(data.casi || '');
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -108,6 +122,9 @@ export default function ComposerPage() {
     fetchUmbral();
   }, [umbralId]);
 
+  const maquinaElegida = buscarMaquina(maquina);
+  const emocionElegida = buscarEmocion(emocion);
+
   const handleSave = async () => {
     const experience_config = {
       ciclo, // Guardar el ciclo
@@ -136,6 +153,12 @@ export default function ComposerPage() {
       .update({
         position,
         ciclo,
+        maquina: maquina || null,
+        emocion: emocion || null,
+        accion_exigida: accionExigida || null,
+        restriccion: restriccion || null,
+        feedback: feedback || null,
+        casi: casi || null,
         trigger_config: { type: 'geo_radius', radius: triggerRadius, orientation: requiresOrientation },
         experience_config
       })
@@ -314,23 +337,150 @@ export default function ComposerPage() {
           </label>
         </div>
 
-        {/* 🌀 CICLO - Grupo de nodos */}
+        {/* 🌀 CICLO - Grupo de nodos.
+            Estos botones no hacian nada: su onClick estaba vacio con un
+            comentario pendiente, asi que el ciclo elegido en el Composer se
+            perdia siempre. Ahora escriben en la columna ciclo. */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <h2 className="text-violet-400 font-bold text-xs uppercase mb-3">🌀 Ciclo</h2>
-          <p className="text-[10px] text-slate-500 mb-2">A qué ciclo pertenece este nodo (4 nodos = 1 metapuzzle)</p>
+          <p className="text-[10px] text-slate-500 mb-2">A qué ciclo pertenece este umbral (4 umbrales = 1 metapuzzle)</p>
           <div className="flex flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map(c => (
               <button
                 key={c}
-                onClick={() => {
-                  // We'll store this in experience_config.ciclo
-                }}
-                className="px-3 py-1 rounded text-xs bg-slate-700 hover:bg-slate-600"
+                onClick={() => setCiclo(c)}
+                className={`px-3 py-1 rounded text-xs ${
+                  ciclo === c
+                    ? (c === 1 ? 'bg-violet-600' : c === 2 ? 'bg-blue-600'
+                      : c === 3 ? 'bg-green-600' : c === 4 ? 'bg-orange-600' : 'bg-red-600')
+                    : 'bg-slate-700 hover:bg-slate-600'
+                }`}
               >
                 🌀 {c}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* ⚙️ LA MÁQUINA: qué mecánica emocional usa este umbral */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h2 className="text-violet-400 font-bold text-xs uppercase mb-1">⚙️ Máquina</h2>
+          <p className="text-[10px] text-slate-500 mb-3">
+            Una mecánica no es una ocurrencia: es una máquina emocional.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {MAQUINAS.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  setMaquina(m.id);
+                  if (m.emocionId) setEmocion(m.emocionId);
+                }}
+                className={`text-left px-2 py-2 rounded text-xs ${
+                  maquina === m.id ? 'bg-violet-600' : 'bg-slate-800 hover:bg-slate-700'
+                }`}
+              >
+                <span className="mr-1">{m.icono}</span>
+                {m.nombre}
+                {m.requiereGrupo && <span className="ml-1 text-[9px] opacity-70">👥</span>}
+              </button>
+            ))}
+          </div>
+          {maquinaElegida && (
+            <div className="mt-3 bg-slate-950 border border-violet-900/50 rounded-lg p-3">
+              <p className="text-[11px] text-slate-300">{maquinaElegida.mecanismo}</p>
+              <p className="text-[11px] text-amber-300 mt-2">
+                <strong>Regla:</strong> {maquinaElegida.regla}
+              </p>
+              {maquinaElegida.requiereGrupo && (
+                <p className="text-[10px] text-cyan-300 mt-2">
+                  👥 Necesita más de un jugador. UMBRA se juega en familias.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ❤️ LA EMOCIÓN OBJETIVO */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h2 className="text-violet-400 font-bold text-xs uppercase mb-1">❤️ Emoción objetivo</h2>
+          <p className="text-[10px] text-slate-500 mb-3">
+            Elige la emoción antes del puzzle, y diseña hacia atrás.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {EMOCIONES.map((e) => (
+              <button
+                key={e.id}
+                onClick={() => setEmocion(e.id)}
+                className={`text-left px-2 py-2 rounded text-xs ${
+                  emocion === e.id ? 'bg-violet-600' : 'bg-slate-800 hover:bg-slate-700'
+                }`}
+              >
+                {e.nombre}
+              </button>
+            ))}
+          </div>
+          {emocionElegida && (
+            <div className="mt-3 bg-slate-950 border border-slate-800 rounded-lg p-3">
+              <p className="text-[10px] text-slate-500 uppercase">{emocionElegida.etapa}</p>
+              <p className="text-[11px] text-slate-300 mt-1">{emocionElegida.mecanica}</p>
+              <p className="text-[11px] text-amber-300 mt-2">
+                <strong>Riesgo:</strong> {emocionElegida.riesgo}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 🔧 LA FÓRMULA OPERACIONAL */}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <h2 className="text-violet-400 font-bold text-xs uppercase mb-1">🔧 La máquina, por dentro</h2>
+          <p className="text-[10px] text-slate-500 mb-3">
+            Emoción + acción exigida + información incompleta + restricción + feedback.
+          </p>
+
+          <label className="block text-[11px] text-slate-400 mb-1">
+            Acción exigida — ¿qué tiene que <em>hacer</em>, no responder?
+          </label>
+          <textarea
+            value={accionExigida}
+            onChange={(e) => setAccionExigida(e.target.value)}
+            placeholder="Contar, medir, esperar, callar, volver de noche…"
+            rows={2}
+            className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm mb-3"
+          />
+
+          <label className="block text-[11px] text-slate-400 mb-1">
+            Restricción — ¿qué le da peso?
+          </label>
+          <textarea
+            value={restriccion}
+            onChange={(e) => setRestriccion(e.target.value)}
+            placeholder="Tiempo, silencio, una prohibición, el riesgo de perder algo…"
+            rows={2}
+            className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm mb-3"
+          />
+
+          <label className="block text-[11px] text-slate-400 mb-1">
+            Casi — ¿qué pista lo acerca pero todavía no cierra?
+          </label>
+          <textarea
+            value={casi}
+            onChange={(e) => setCasi(e.target.value)}
+            placeholder="El motor dopaminérgico: proximidad sin entrega total."
+            rows={2}
+            className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm mb-3"
+          />
+
+          <label className="block text-[11px] text-slate-400 mb-1">
+            Feedback — ¿qué responde el sistema?
+          </label>
+          <textarea
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Revelación, desbloqueo, recompensa o consecuencia narrativa."
+            rows={2}
+            className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm"
+          />
         </div>
 
         {/* 📍 Ubicación del nodo */}

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { validar, resumir, type Hallazgo } from '@/lib/validador';
+import CurvaEmocional from '@/components/CurvaEmocional';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
@@ -27,6 +29,9 @@ export default function SequencerPage() {
   const labyrinthosId = params.id as string;
   
   const [allUmbrales, setAllUmbrales] = useState<Umbral[]>([]);
+  // Los umbrales completos, para la curva y el validador.
+  const [umbralesCrudos, setUmbralesCrudos] = useState<any[]>([]);
+  const [hallazgos, setHallazgos] = useState<Hallazgo[]>([]);
   const [labyrinthos, setLabyrinthos] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState({ lat: 21.1583, lng: -100.9326 });
@@ -53,6 +58,8 @@ export default function SequencerPage() {
         .order('created_at', { ascending: true });
 
       if (umbs) {
+        setUmbralesCrudos(umbs);
+        setHallazgos(validar(cath || {}, umbs));
         setAllUmbrales(umbs.map((u: any) => ({
           id: u.id,
           position: u.position,
@@ -90,11 +97,63 @@ export default function SequencerPage() {
 
       {/* Map - full height, just shows umbrales */}
       <div className="flex-1 relative m-2 rounded-xl overflow-hidden border border-slate-800 min-h-[200px]">
-        <MapComponent 
+        <MapComponent
           center={mapCenter}
           umbrales={allUmbrales}
           showUserLocation={false}
         />
+      </div>
+
+      {/* Curva emocional del recorrido */}
+      <div className="mx-2 mb-2 bg-slate-900 border border-slate-800 rounded-xl p-3 shrink-0">
+        <h2 className="text-violet-400 font-bold text-xs uppercase mb-2">
+          📈 Curva emocional
+        </h2>
+        <CurvaEmocional umbrales={umbralesCrudos} />
+      </div>
+
+      {/* Control de calidad: los avisos salen de los riesgos y reglas que
+          están escritos en los propios documentos de diseño. */}
+      <div className="mx-2 mb-2 bg-slate-900 border border-slate-800 rounded-xl p-3 shrink-0 max-h-[30vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-violet-400 font-bold text-xs uppercase">
+            ✓ Control de calidad
+          </h2>
+          <span className="text-[10px] text-slate-500">{resumir(hallazgos)}</span>
+        </div>
+
+        {hallazgos.length === 0 ? (
+          <p className="text-xs text-emerald-400">
+            Sin hallazgos. El diseño cumple las comprobaciones automáticas.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {hallazgos.map((h, i) => {
+              const estilo =
+                h.gravedad === 'error'
+                  ? 'border-red-700 bg-red-950/30 text-red-300'
+                  : h.gravedad === 'aviso'
+                    ? 'border-amber-700 bg-amber-950/30 text-amber-300'
+                    : 'border-slate-700 bg-slate-800/40 text-slate-400';
+              const icono =
+                h.gravedad === 'error' ? '✕' : h.gravedad === 'aviso' ? '!' : '·';
+              return (
+                <li key={i} className={`border rounded-lg p-2 ${estilo}`}>
+                  <p className="text-xs font-bold">
+                    <span className="mr-1">{icono}</span>
+                    {h.titulo}
+                    {h.donde && (
+                      <span className="ml-2 text-[10px] opacity-70 font-normal">
+                        {h.donde}
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-[11px] opacity-90 mt-1">{h.detalle}</p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {/* Umbrales List */}
