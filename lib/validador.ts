@@ -10,7 +10,10 @@
  * queje en la catedral. Este archivo existe para que eso salte antes.
  */
 
-import { EMOCIONES, buscarEmocion, buscarMaquina, type IdEmocion } from './maquinas';
+import {
+  EMOCIONES, ETAPAS, buscarEmocion, buscarMaquina, etapaDeCiclo,
+  CICLO_CAMARA_OSCURA, type IdEmocion,
+} from './maquinas';
 
 export type Gravedad = 'error' | 'aviso' | 'sugerencia';
 
@@ -33,6 +36,8 @@ export interface UmbralParaValidar {
   feedback?: string | null;
   casi?: string | null;
   pacing_value?: number | null;
+  exige_presencia?: boolean | null;
+  camara_oscura?: boolean | null;
   experience_config?: any;
 }
 
@@ -95,6 +100,93 @@ export function validar(
     }
   }
 
+  // --- El arco: cada ciclo pertenece a una etapa ----------------------
+  // Cinco ciclos cubren las etapas II a VI, uno por etapa. Si una máquina
+  // no corresponde a la etapa de su ciclo, el arco se desordena.
+  for (const u of umbrales) {
+    const c = u.ciclo ?? u.experience_config?.ciclo ?? 1;
+    const etapa = etapaDeCiclo(c);
+    const m = buscarMaquina(u.maquina);
+    if (etapa && m && m.etapa !== etapa.numero) {
+      const suya = ETAPAS.find((e) => e.numero === m.etapa);
+      h.push({
+        gravedad: 'error',
+        titulo: `El umbral ${u.node_number ?? '?'} rompe el orden del arco`,
+        detalle:
+          `Está en el ciclo ${c}, que corresponde a la etapa ${etapa.romano} (${etapa.nombre}), ` +
+          `pero usa ${m.nombre}, que pertenece a la etapa ${suya?.romano} (${suya?.nombre}).`,
+        donde: `Umbral ${u.node_number ?? '?'}`,
+      });
+    }
+    if (!etapa && c >= 1 && c <= 5) {
+      // No debería ocurrir, pero avisa si el catálogo y los datos se desalinean.
+      h.push({
+        gravedad: 'aviso',
+        titulo: `El ciclo ${c} no tiene etapa asignada`,
+        detalle: 'Revisa la correspondencia entre ciclos y etapas del arco.',
+      });
+    }
+  }
+
+  // --- La Complicidad exige grupo ------------------------------------
+  // El ciclo 3 es la etapa de Los Aliados, y esa etapa no ocurre sin una
+  // máquina que enfrente a los jugadores entre sí.
+  const cicloAliados = ETAPAS.find((e) => e.emocion === 'complicidad')?.ciclo;
+  if (cicloAliados) {
+    const delCiclo = umbrales.filter(
+      (u) => (u.ciclo ?? u.experience_config?.ciclo ?? 1) === cicloAliados
+    );
+    if (delCiclo.length > 0) {
+      const hayGrupo = delCiclo.some((u) => buscarMaquina(u.maquina)?.requiereGrupo);
+      if (!hayGrupo) {
+        h.push({
+          gravedad: 'error',
+          titulo: `El ciclo ${cicloAliados} no produce Complicidad`,
+          detalle:
+            'Ningún umbral usa una máquina de grupo. La Complicidad no se narra: ' +
+            'se produce obligando a los jugadores a depender entre sí. Usa ' +
+            'Información Oculta o Prueba de Confianza.',
+          donde: `Ciclo ${cicloAliados}`,
+        });
+      }
+    }
+  }
+
+  // --- La Cámara Oscura es única y va al final ------------------------
+  const conCamara = umbrales.filter((u) => u.camara_oscura);
+  if (conCamara.length > 1) {
+    h.push({
+      gravedad: 'error',
+      titulo: 'Hay más de una Cámara Oscura',
+      detalle:
+        'La Cámara Oscura es única: es la muerte del yo, no un cierre de ciclo. ' +
+        `Debe estar solo al final del ciclo ${CICLO_CAMARA_OSCURA}.`,
+    });
+  }
+  for (const u of conCamara) {
+    const c = u.ciclo ?? u.experience_config?.ciclo ?? 1;
+    if (c !== CICLO_CAMARA_OSCURA) {
+      h.push({
+        gravedad: 'error',
+        titulo: `Cámara Oscura fuera de sitio (ciclo ${c})`,
+        detalle: `Va al final del ciclo ${CICLO_CAMARA_OSCURA}, justo antes del Orgullo.`,
+        donde: `Umbral ${u.node_number ?? '?'}`,
+      });
+    }
+  }
+
+  // --- El sello de presencia física ----------------------------------
+  const sinSello = umbrales.filter((u) => u.exige_presencia !== true);
+  if (sinSello.length > 0) {
+    h.push({
+      gravedad: 'aviso',
+      titulo: `${sinSello.length} umbral(es) sin sello de presencia`,
+      detalle:
+        'Sin confirmar que no se resuelven desde casa buscando en Google. ' +
+        'Es el pilar Anti-IA por diseño: el lugar real debe ser la interfaz.',
+    });
+  }
+
   // --- El clímax -----------------------------------------------------
   const emociones = umbrales.map((u) => u.emocion).filter(Boolean) as IdEmocion[];
 
@@ -117,50 +209,74 @@ export function validar(
       });
     }
 
-    if (emociones.includes('deseo') && !emociones.includes('orgullo')) {
+    // El Orgullo vive en el cierre (etapa VII), no en los ciclos. Lo que se
+    // comprueba es que el cierre exista, no que haya un ciclo de Orgullo.
+    const hayCierre = umbrales.some(
+      (u) => u.maquina === 'reconocimiento_grupo' || u.emocion === 'orgullo'
+    );
+    if (emociones.includes('deseo') && !hayCierre) {
       h.push({
         gravedad: 'aviso',
-        titulo: 'Deseo prometido sin recompensa',
+        titulo: 'El cierre no está diseñado',
         detalle:
-          'Hay Deseo pero ningún Orgullo que lo cierre. Riesgo declarado del ' +
-          'Deseo: prometer algo que el sistema no entrega.',
+          'Hay Deseo prometido pero ningún Reconocimiento del Grupo que lo ' +
+          'cobre. Riesgo declarado del Deseo: prometer algo que el sistema no ' +
+          'entrega. El cierre son las etapas VII y VIII, fuera de los cinco ciclos.',
       });
     }
 
-    if (!emociones.includes('transformacion')) {
+  }
+  // Nota: no se reclama Misterio ni Transformación por umbral. El Misterio
+  // (etapa I) se consigue al ofrecer la experiencia, fuera de la herramienta,
+  // y la Transformación (etapa VIII) pertenece al cierre, no a los ciclos.
+
+  const ordenados = [...umbrales].sort(
+    (a, b) => (a.node_number ?? 0) - (b.node_number ?? 0)
+  );
+
+  // --- Desgaste: la misma emoción abarcando varios ciclos -------------
+  // Dentro de un ciclo la emoción se repite POR DISEÑO, porque el ciclo es
+  // una etapa. Lo que sí desgasta es que dos ciclos consecutivos persigan la
+  // misma emoción: eso significa que el arco se ha estancado en una etapa.
+  const emocionPorCiclo = new Map<number, Set<string>>();
+  for (const u of umbrales) {
+    const c = u.ciclo ?? u.experience_config?.ciclo ?? 1;
+    if (!emocionPorCiclo.has(c)) emocionPorCiclo.set(c, new Set());
+    if (u.emocion) emocionPorCiclo.get(c)!.add(u.emocion);
+  }
+  const ciclosConEmocion = Array.from(emocionPorCiclo.entries())
+    .sort((a, b) => a[0] - b[0])
+    .filter(([, s]) => s.size === 1)
+    .map(([c, s]) => ({ ciclo: c, emocion: Array.from(s)[0] }));
+
+  for (let i = 1; i < ciclosConEmocion.length; i++) {
+    const prev = ciclosConEmocion[i - 1];
+    const act = ciclosConEmocion[i];
+    if (prev.emocion === act.emocion && act.ciclo === prev.ciclo + 1) {
+      const e = buscarEmocion(act.emocion);
       h.push({
-        gravedad: 'sugerencia',
-        titulo: 'Sin transformación final',
-        detalle:
-          'Ningún umbral persigue la Transformación. El criterio de éxito es ' +
-          'que el lugar quede alterado en la memoria del jugador.',
+        gravedad: 'aviso',
+        titulo: `Los ciclos ${prev.ciclo} y ${act.ciclo} persiguen la misma emoción`,
+        detalle: e
+          ? `El arco se estanca en ${e.nombre}. Riesgo declarado: ${e.riesgo.toLowerCase()}.`
+          : 'Dos ciclos consecutivos con la misma emoción estancan el arco.',
+        donde: `Ciclos ${prev.ciclo}–${act.ciclo}`,
       });
     }
   }
 
-  // --- Desgaste: emociones repetidas seguidas ------------------------
-  const ordenados = [...umbrales].sort(
-    (a, b) => (a.node_number ?? 0) - (b.node_number ?? 0)
-  );
-  let racha = 1;
-  for (let i = 1; i < ordenados.length; i++) {
-    const previa = ordenados[i - 1].emocion;
-    const actual = ordenados[i].emocion;
-    if (actual && actual === previa) {
-      racha++;
-      if (racha === 3) {
-        const e = buscarEmocion(actual);
-        h.push({
-          gravedad: 'aviso',
-          titulo: `Tres umbrales seguidos de ${e?.nombre ?? actual}`,
-          detalle: e
-            ? `Riesgo declarado: ${e.riesgo.toLowerCase()}.`
-            : 'Encadenar la misma emoción desgasta la curva.',
-          donde: `Umbrales ${ordenados[i - 2].node_number}–${ordenados[i].node_number}`,
-        });
-      }
-    } else {
-      racha = 1;
+  // --- Emociones mezcladas dentro de un mismo ciclo ------------------
+  for (const [c, s] of Array.from(emocionPorCiclo.entries()).sort((a, b) => a[0] - b[0])) {
+    if (s.size > 1) {
+      const etapa = etapaDeCiclo(c);
+      h.push({
+        gravedad: 'aviso',
+        titulo: `El ciclo ${c} mezcla emociones`,
+        detalle:
+          `Contiene ${Array.from(s).join(', ')}. Un ciclo es una etapa del arco` +
+          (etapa ? `, y la del ciclo ${c} es ${etapa.emocion}.` : '.'),
+        donde: `Ciclo ${c}`,
+      });
     }
   }
 

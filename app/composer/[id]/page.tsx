@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase, explicarError } from '@/lib/supabase';
-import { MAQUINAS, EMOCIONES, buscarMaquina, buscarEmocion } from '@/lib/maquinas';
+import {
+  buscarMaquina, etapaDeCiclo, maquinasDeCiclo,
+  SELLO_PRESENCIA, CICLO_CAMARA_OSCURA,
+} from '@/lib/maquinas';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/Map'), { 
@@ -59,6 +62,8 @@ export default function ComposerPage() {
   const [restriccion, setRestriccion] = useState('');
   const [feedback, setFeedback] = useState('');
   const [casi, setCasi] = useState('');
+  const [exigePresencia, setExigePresencia] = useState(false);
+  const [camaraOscura, setCamaraOscura] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -91,6 +96,8 @@ export default function ComposerPage() {
         setRestriccion(data.restriccion || '');
         setFeedback(data.feedback || '');
         setCasi(data.casi || '');
+        setExigePresencia(data.exige_presencia === true);
+        setCamaraOscura(data.camara_oscura === true);
         if (data.experience_config) {
           const exp = data.experience_config;
           // Load umbra layer
@@ -123,7 +130,8 @@ export default function ComposerPage() {
   }, [umbralId]);
 
   const maquinaElegida = buscarMaquina(maquina);
-  const emocionElegida = buscarEmocion(emocion);
+  const etapaActual = etapaDeCiclo(ciclo);
+  const maquinasDisponibles = maquinasDeCiclo(ciclo);
 
   const handleSave = async () => {
     const experience_config = {
@@ -159,6 +167,8 @@ export default function ComposerPage() {
         restriccion: restriccion || null,
         feedback: feedback || null,
         casi: casi || null,
+        exige_presencia: exigePresencia,
+        camara_oscura: camaraOscura,
         trigger_config: { type: 'geo_radius', radius: triggerRadius, orientation: requiresOrientation },
         experience_config
       })
@@ -362,19 +372,30 @@ export default function ComposerPage() {
           </div>
         </div>
 
-        {/* ⚙️ LA MÁQUINA: qué mecánica emocional usa este umbral */}
+        {/* ⚙️ LA MÁQUINA.
+            Solo se ofrecen las que corresponden a la etapa de este ciclo: si
+            hay que generar Urgencia, para eso está la Cuenta Regresiva, y no
+            debe generarse Urgencia en otra etapa del arco. */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
           <h2 className="text-violet-400 font-bold text-xs uppercase mb-1">⚙️ Máquina</h2>
-          <p className="text-[10px] text-slate-500 mb-3">
-            Una mecánica no es una ocurrencia: es una máquina emocional.
-          </p>
+          {etapaActual ? (
+            <p className="text-[10px] text-slate-500 mb-3">
+              Ciclo {ciclo} · etapa <strong className="text-slate-300">{etapaActual.romano} — {etapaActual.nombre}</strong>.
+              Emoción de esta etapa: <strong className="text-slate-300">{etapaActual.emocion}</strong>.
+            </p>
+          ) : (
+            <p className="text-[10px] text-amber-400 mb-3">
+              El ciclo {ciclo} no corresponde a ninguna etapa del arco.
+            </p>
+          )}
+
           <div className="grid grid-cols-2 gap-2">
-            {MAQUINAS.map((m) => (
+            {maquinasDisponibles.map((m) => (
               <button
                 key={m.id}
                 onClick={() => {
                   setMaquina(m.id);
-                  if (m.emocionId) setEmocion(m.emocionId);
+                  setEmocion(m.emocion);
                 }}
                 className={`text-left px-2 py-2 rounded text-xs ${
                   maquina === m.id ? 'bg-violet-600' : 'bg-slate-800 hover:bg-slate-700'
@@ -386,11 +407,22 @@ export default function ComposerPage() {
               </button>
             ))}
           </div>
+
+          {maquinasDisponibles.length === 0 && (
+            <p className="text-[11px] text-slate-500">
+              No hay máquinas para esta etapa. Cambia el ciclo.
+            </p>
+          )}
+
           {maquinaElegida && (
             <div className="mt-3 bg-slate-950 border border-violet-900/50 rounded-lg p-3">
               <p className="text-[11px] text-slate-300">{maquinaElegida.mecanismo}</p>
               <p className="text-[11px] text-amber-300 mt-2">
                 <strong>Regla:</strong> {maquinaElegida.regla}
+              </p>
+              <p className="text-[11px] text-violet-300 mt-2">
+                Produce <strong>{maquinaElegida.emocion}</strong>. La emoción no se
+                elige: es consecuencia de la máquina.
               </p>
               {maquinaElegida.requiereGrupo && (
                 <p className="text-[10px] text-cyan-300 mt-2">
@@ -401,35 +433,49 @@ export default function ComposerPage() {
           )}
         </div>
 
-        {/* ❤️ LA EMOCIÓN OBJETIVO */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <h2 className="text-violet-400 font-bold text-xs uppercase mb-1">❤️ Emoción objetivo</h2>
-          <p className="text-[10px] text-slate-500 mb-3">
-            Elige la emoción antes del puzzle, y diseña hacia atrás.
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {EMOCIONES.map((e) => (
-              <button
-                key={e.id}
-                onClick={() => setEmocion(e.id)}
-                className={`text-left px-2 py-2 rounded text-xs ${
-                  emocion === e.id ? 'bg-violet-600' : 'bg-slate-800 hover:bg-slate-700'
-                }`}
-              >
-                {e.nombre}
-              </button>
-            ))}
-          </div>
-          {emocionElegida && (
-            <div className="mt-3 bg-slate-950 border border-slate-800 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase">{emocionElegida.etapa}</p>
-              <p className="text-[11px] text-slate-300 mt-1">{emocionElegida.mecanica}</p>
-              <p className="text-[11px] text-amber-300 mt-2">
-                <strong>Riesgo:</strong> {emocionElegida.riesgo}
-              </p>
-            </div>
-          )}
+        {/* 🔭 SELLO DE PRESENCIA: el pilar Anti-IA, obligatorio */}
+        <div className={`border rounded-xl p-3 ${
+          exigePresencia
+            ? 'bg-emerald-950/30 border-emerald-800'
+            : 'bg-amber-950/30 border-amber-800'
+        }`}>
+          <h2 className="text-xs font-bold uppercase mb-1 text-slate-200">
+            🔭 {SELLO_PRESENCIA.titulo}
+          </h2>
+          <p className="text-[11px] text-slate-300 mb-2">{SELLO_PRESENCIA.pregunta}</p>
+          <label className="flex items-start gap-2 text-xs text-slate-200">
+            <input
+              type="checkbox"
+              checked={exigePresencia}
+              onChange={(e) => setExigePresencia(e.target.checked)}
+              className="accent-emerald-500 mt-0.5"
+            />
+            <span>
+              Confirmo que <strong>no</strong> se puede resolver desde casa.
+            </span>
+          </label>
+          <p className="text-[10px] text-amber-300 mt-2">{SELLO_PRESENCIA.regla}</p>
         </div>
+
+        {/* 🌑 CÁMARA OSCURA: única, al final del ciclo 5 */}
+        {ciclo === CICLO_CAMARA_OSCURA && (
+          <div className="bg-slate-900 border border-red-900/60 rounded-xl p-3">
+            <h2 className="text-red-400 font-bold text-xs uppercase mb-1">🌑 Cámara Oscura</h2>
+            <p className="text-[10px] text-slate-500 mb-2">
+              Única en todo el Labyrinthos, al final del ciclo {CICLO_CAMARA_OSCURA},
+              justo antes del Orgullo. La muerte del yo.
+            </p>
+            <label className="flex items-center gap-2 text-xs text-slate-200">
+              <input
+                type="checkbox"
+                checked={camaraOscura}
+                onChange={(e) => setCamaraOscura(e.target.checked)}
+                className="accent-red-500"
+              />
+              Este umbral es la Cámara Oscura
+            </label>
+          </div>
+        )}
 
         {/* 🔧 LA FÓRMULA OPERACIONAL */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-3">
