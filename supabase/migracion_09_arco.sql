@@ -50,7 +50,11 @@ create unique index if not exists idx_una_camara_oscura
   where camara_oscura;
 
 -- Vista de diseno, ampliada.
-create or replace view v_diseno_umbrales as
+-- Hay que borrarla antes: "create or replace view" solo permite ANADIR
+-- columnas al final, y aqui se insertan dos en medio de las que creo la
+-- migracion 08. Sin el drop, Postgres responde 42P16.
+drop view if exists v_diseno_umbrales;
+create view v_diseno_umbrales as
 select
   l.name as labyrinthos, u.labyrinthos_id, u.ciclo, u.node_number,
   u.maquina, u.emocion, u.pacing_value,
