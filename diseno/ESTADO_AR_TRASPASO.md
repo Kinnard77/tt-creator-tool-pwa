@@ -7,11 +7,27 @@ descartó, y por qué.
 
 ## EL PROBLEMA ABIERTO, y es grave
 
-**ARCore no sigue el movimiento del jugador.** Caminando **6 metros reales**,
-la app reporta **0,7 m**. En otro intento, **10 m reales → 4,7 m**.
+**ARCore no sigue el movimiento en distancias largas.** Medido en campo:
+26,20 m reales → la app reporta **2,7 m**. Antes: 6 m → 0,7 m; 10 m → 4,7 m.
+Factor de 3 a 10. Mientras no se resuelva, cualquier medida es basura.
 
-No es deriva ni imprecisión acumulada: es un factor de 3 a 8. Mientras esto
-no se resuelva, **cualquier medida de precisión que se saque es basura**.
+### Lo que SÍ funciona (medido el 1 de agosto)
+
+- **En corto el tracking es bueno**: Jorge colocó el Cryptex, se alejó, volvió
+  sobre sus pasos y **las marcas seguían donde las puso**.
+- El fallo aparece **al alejarse**, no al moverse despacio. Camina lento y con
+  el móvil estable, así que no es por movimiento brusco.
+- **La deriva vertical está confirmada**: la 2ª, 3ª y 4ª marca aparecían en el
+  aire. Se corrigió colocándolas a 1,35 m por debajo de la cámara en vez de
+  en el plano y=0, que es el que deriva.
+
+### Hipótesis a comprobar la próxima vez
+
+La v26 muestra **el estado del tracking permanentemente entre corchetes**
+delante de cada mensaje: `[OK]`, `[PERDIDO]`, `[SIN TEXTURA]`, `[MOVIMIENTO]`.
+**Caminar 25 m mirando ese corchete.** Si al llegar dice `[PERDIDO]` o
+`[SIN TEXTURA]`, el problema es que ARCore deja de ver. Si dice `[OK]` y aun
+así cuenta 2,7 m, el problema es otro y mucho más raro.
 
 ### Lo que hay que averiguar primero
 

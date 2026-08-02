@@ -9,13 +9,14 @@
 
 ## BLOQUEANTE — nada avanza hasta resolver esto
 
-- [ ] **Diagnosticar por qué ARCore no sigue el movimiento.**
-      Caminando 6 m reales, la app reporta 0,7 m. En otro intento, 10 m → 4,7 m.
-      No es deriva: es un factor de 3 a 8. Mientras siga así, cualquier medida
-      de precisión es basura.
-      Construir pantalla de diagnóstico: posición cruda de la cámara en vivo,
-      estado del tracking permanente y grande, y el registro en texto para
-      fotografiar — los datos viven en el móvil y el asistente no los ve.
+- [ ] **Diagnosticar por qué ARCore no sigue el movimiento en largo.**
+      Medido: 26,20 m reales → 2,7 m reportados. Factor de 3 a 10.
+      **En corto SÍ funciona**: volviendo sobre sus pasos, las marcas seguían
+      donde las puso. El fallo aparece al alejarse.
+      La v26 ya muestra el estado del tracking permanentemente entre
+      corchetes. **Siguiente paso concreto: caminar 25 m mirando ese
+      corchete.** Si dice PERDIDO o SIN TEXTURA, ARCore deja de ver. Si dice
+      OK y aun así cuenta 2,7 m, el problema es otro.
 
 - [ ] **Medir el error real** con el recorrido de 4 referencias ya medido con
       láser. Repetir 3-4 veces. **Importa el PEOR caso, no la media.**
